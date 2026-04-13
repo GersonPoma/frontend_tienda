@@ -3,6 +3,12 @@ import { BlankComponent } from './layouts/blank/blank.component';
 import { FullComponent } from './layouts/full/full.component';
 
 export const routes: Routes = [
+    // Redirigir raíz a login
+  {
+    path: '',
+    redirectTo: '/login',
+    pathMatch: 'full'
+  },
   // Rutas SIN sidebar (BlankComponent) - Login y Registro
   {
     path: '',
