@@ -106,7 +106,7 @@ export class CrearProductoComponent implements OnInit, OnDestroy {
     this.isSaving = true;
     const formValues = this.form.value;
     const url = this.configService.getApiUrl('productos');
-    console.log('URL:', url, 'producto id:', this.data.producto?.id);
+    console.log('URL:', url, 'producto id:', this.data?.producto?.id);
     
     const productoData = {
       codigo: formValues.codigo,
@@ -116,7 +116,7 @@ export class CrearProductoComponent implements OnInit, OnDestroy {
     };
 
     if (this.isEditMode) {
-      console.log('Updating producto:', this.data.producto.id);
+      console.log('Updating producto:', this.data?.producto?.id);
       this.apiService.update(url, this.data.producto.id, productoData)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
