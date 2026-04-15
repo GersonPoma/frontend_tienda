@@ -13,8 +13,9 @@
 @media (max-width: 991px) {
   .mat-drawer.sidebarNav {
     position: fixed;
-    top: 70px;
-    z-index: 999;
+    top: 0;
+    height: 100vh;
+    z-index: 1000;
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.18);
     border-right: 1px solid $borderColor;
   }
