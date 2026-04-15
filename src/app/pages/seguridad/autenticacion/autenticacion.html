@@ -75,10 +75,9 @@
               </mat-form-field>
             </ng-container>
 
-            <!-- Remember Device & Forgot Password (solo en login) -->
-            <div *ngIf="isLogin" class="d-flex align-items-center m-b-12 m-t-24">
-              <mat-checkbox color="primary">Recuerda este dispositivo</mat-checkbox>
-              <a [routerLink]="['/']" class="text-primary f-w-600 text-decoration-none m-l-auto f-s-14">
+            <!-- Forgot Password (solo en login) -->
+            <div *ngIf="isLogin" class="text-center m-b-12 m-t-24">
+              <a [routerLink]="['/']" class="text-primary f-w-600 text-decoration-none f-s-14">
                 ¿Olvidaste tu contraseña?
               </a>
             </div>

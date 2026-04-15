@@ -1,20 +1,20 @@
 <mat-card>
   <mat-card-header>
-    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 16px;">
+    <div class="page-header">
       <mat-card-title>Gestión de Proveedores</mat-card-title>
       <button mat-raised-button color="primary" (click)="crearProveedor()">
-        <mat-icon style="margin-right: 8px;">add</mat-icon>
+        <mat-icon class="m-r-8">add</mat-icon>
         Crear Nuevo Proveedor
       </button>
     </div>
   </mat-card-header>
 
   <mat-card-content>
-    <div *ngIf="isLoading" style="display: flex; justify-content: center; padding: 40px;">
+    <div *ngIf="isLoading" class="d-flex justify-content-center p-y-40">
       <mat-spinner diameter="50"></mat-spinner>
     </div>
 
-    <div *ngIf="!isLoading && dataSource.length > 0">
+    <div *ngIf="!isLoading && dataSource.length > 0" class="table-responsive">
       <table mat-table [dataSource]="dataSource" class="w-full">
         <ng-container matColumnDef="id">
           <th mat-header-cell *matHeaderCellDef>ID</th>
@@ -53,9 +53,9 @@
       </table>
     </div>
 
-    <div *ngIf="!isLoading && dataSource.length === 0" style="text-align: center; padding: 40px;">
-      <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #ccc;">info</mat-icon>
-      <p style="color: #999; margin-top: 16px;">No hay proveedores disponibles</p>
+    <div *ngIf="!isLoading && dataSource.length === 0" class="empty-state">
+      <mat-icon class="empty-icon">info</mat-icon>
+      <p class="empty-text">No hay proveedores disponibles</p>
     </div>
 
     <mat-paginator

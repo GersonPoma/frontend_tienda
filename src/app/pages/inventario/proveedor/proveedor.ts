@@ -128,6 +128,7 @@ export class ProveedorComponent implements OnInit, OnDestroy {
   eliminarProveedor(proveedor: Proveedor): void {
     const dialogRef = this.dialog.open(EliminarProveedorComponent, {
       width: '500px',
+      maxWidth: '90vw',
       data: { proveedor }
     });
 

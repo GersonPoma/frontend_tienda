@@ -17,9 +17,17 @@ html {
 
   .table-responsive {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+
+    table {
+      width: auto !important;
+      min-width: 100%;
+    }
 
     td,
-    mat-cell {
+    mat-cell,
+    th,
+    mat-header-cell {
       white-space: nowrap;
       padding: 16px 24px;
     }
