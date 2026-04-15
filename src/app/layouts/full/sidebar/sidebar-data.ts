@@ -27,6 +27,11 @@ export const navItems: NavItem[] = [
     iconName: 'solar:shop-2-line-duotone',
     route: '/inventario/productos',
   },
+  {
+    displayName: 'Proveedores',
+    iconName: 'solar:bag-3-line-duotone',
+    route: '/inventario/proveedores',
+  },
   // {
   //   navCap: 'Home',
   // },
