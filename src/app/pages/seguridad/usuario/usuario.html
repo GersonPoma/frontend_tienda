@@ -42,6 +42,15 @@
           <td mat-cell *matCellDef="let element">{{ element.apellido }}</td>
         </ng-container>
 
+        <!-- Email Column -->
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef>Correo</th>
+          <td mat-cell *matCellDef="let element">
+            <span *ngIf="element.email">{{ element.email }}</span>
+            <span *ngIf="!element.email" style="color: #bbb; font-style: italic;">Sin correo</span>
+          </td>
+        </ng-container>
+
         <!-- Rol Column -->
         <ng-container matColumnDef="grupos">
           <th mat-header-cell *matHeaderCellDef>Grupos</th>

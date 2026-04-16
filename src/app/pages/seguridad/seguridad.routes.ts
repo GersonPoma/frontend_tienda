@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { RolComponent } from './rol/rol';
 import { Autenticacion } from './autenticacion/autenticacion';
 import { UsuarioComponent } from './usuario/usuario';
+import { RecuperarPasswordComponent } from './recuperar-password/recuperar-password.component';
 import { PermisosService } from '../../services/permisos.service';
 import { AuthService } from '../../services/auth.service';
 
@@ -32,6 +33,17 @@ export const SeguridadAuthRoutes: Routes = [
     component: Autenticacion,
     data: {
       title: 'Autenticación'
+    }
+  }
+];
+
+// Rutas públicas (sin sidebar) - Recuperación de contraseña
+export const RecuperarPasswordRoutes: Routes = [
+  {
+    path: '',
+    component: RecuperarPasswordComponent,
+    data: {
+      title: 'Recuperar Contraseña'
     }
   }
 ];

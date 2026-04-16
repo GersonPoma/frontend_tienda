@@ -15,7 +15,6 @@ import { Subject, takeUntil } from 'rxjs';
 import { ApiService } from '../../../../services/api.service';
 import { ConfigService } from '../../../../services/config.service';
 import { Rol } from '../../../../models/seguridad/rol.model';
-import { CrearUsuario } from '../../../../models/seguridad/Usuario.model';
 import { Pagination } from '../../../../models/pagination.model';
 
 @Component({
@@ -76,13 +75,17 @@ export class CrearUsuarioComponent implements OnInit, OnDestroy {
     
     this.form = this.formBuilder.group({
       username: [
-        data?.usuario?.username || '', 
+        data?.usuario?.username || '',
         [Validators.required, Validators.minLength(3)]
       ],
+      email: [
+        data?.usuario?.email || '',
+        [Validators.email]
+      ],
       password: [
-        data?.usuario?.password || '', 
-        this.isEditMode 
-          ? [Validators.minLength(8)] 
+        data?.usuario?.password || '',
+        this.isEditMode
+          ? [Validators.minLength(8)]
           : [Validators.required, Validators.minLength(8)]
       ],
       grupo_id: ['', Validators.required]
@@ -251,12 +254,21 @@ export class CrearUsuarioComponent implements OnInit, OnDestroy {
       grupo_id: formValues.grupo_id
     };
 
+    // Email: en edición siempre se envía (permite también vaciarlo)
+    // En creación solo si tiene valor
+    if (this.isEditMode) {
+      datosUsuario.email = formValues.email || '';
+    } else if (formValues.email) {
+      datosUsuario.email = formValues.email;
+    }
+
     // Solo incluir password si tiene contenido o si es creación
     if (!this.isEditMode || formValues.password) {
       datosUsuario.password = formValues.password;
     }
 
     if (this.isEditMode) {
+      console.log('Datos a enviar para actualizar usuario:', datosUsuario);
       // Editar usuario existente
       const url = this.configService.getApiUrl('usuarios');
       this.apiService.update(url, this.data.usuario.id, datosUsuario)

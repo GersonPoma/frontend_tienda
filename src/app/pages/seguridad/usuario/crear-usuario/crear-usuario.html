@@ -21,6 +21,21 @@
       </mat-error>
     </mat-form-field>
 
+    <!-- Campo Email (opcional) -->
+    <mat-form-field appearance="outline" style="width: 100%;">
+      <mat-label>Correo electrónico <span style="font-weight: 400; color: #999;">(opcional)</span></mat-label>
+      <input
+        matInput
+        type="email"
+        formControlName="email"
+        placeholder="Ej: usuario@correo.com"
+      />
+      <mat-icon matSuffix style="color: #999; font-size: 18px;">email</mat-icon>
+      <mat-error *ngIf="form.get('email')?.hasError('email')">
+        Ingresa un correo válido
+      </mat-error>
+    </mat-form-field>
+
     <!-- Campo Password -->
     <mat-form-field appearance="outline" style="width: 100%;">
       <mat-label>Contraseña</mat-label>

@@ -66,6 +66,11 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./pages/seguridad/seguridad.routes').then((m) => m.SeguridadAuthRoutes),
       },
+      {
+        path: 'recuperar-password',
+        loadChildren: () =>
+          import('./pages/seguridad/seguridad.routes').then((m) => m.RecuperarPasswordRoutes),
+      },
     ],
   },
   {

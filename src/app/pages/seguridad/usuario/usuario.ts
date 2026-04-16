@@ -39,7 +39,7 @@ import { EliminarUsuarioComponent } from './eliminar-usuario/eliminar-usuario';
   styleUrl: './usuario.scss',
 })
 export class UsuarioComponent implements OnInit, OnDestroy {
-  displayedColumns: string[] = ['id', 'username', 'nombre', 'apellido', 'grupos', 'is_superuser', 'acciones'];
+  displayedColumns: string[] = ['id', 'username', 'email', 'nombre', 'apellido', 'grupos', 'is_superuser', 'acciones'];
   dataSource: Usuario[] = [];
 
   totalItems = 0;
