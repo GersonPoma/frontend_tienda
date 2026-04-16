@@ -2,7 +2,7 @@
   <mat-card-header>
     <div class="page-header">
       <mat-card-title>Gestión de Roles</mat-card-title>
-      <button mat-raised-button color="primary" (click)="crearRol()">
+      <button *ngIf="puedeCrear" mat-raised-button color="primary" (click)="crearRol()">
         <mat-icon class="m-r-8">add</mat-icon>
         Crear Nuevo Rol
       </button>
@@ -46,16 +46,18 @@
         <ng-container matColumnDef="acciones">
           <th mat-header-cell *matHeaderCellDef>Acciones</th>
           <td mat-cell *matCellDef="let element">
-            <button 
-              mat-icon-button 
-              matTooltip="Editar" 
+            <button
+              *ngIf="puedeEditar"
+              mat-icon-button
+              matTooltip="Editar"
               (click)="editRol(element)"
               color="primary">
               <mat-icon>edit</mat-icon>
             </button>
-            <button 
-              mat-icon-button 
-              matTooltip="Eliminar" 
+            <button
+              *ngIf="puedeEliminar"
+              mat-icon-button
+              matTooltip="Eliminar"
               (click)="deleteRol(element)"
               color="warn">
               <mat-icon>delete</mat-icon>

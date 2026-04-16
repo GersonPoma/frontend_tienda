@@ -16,6 +16,7 @@ import { Rol } from '../../../models/seguridad/rol.model';
 import { Pagination } from '../../../models/pagination.model';
 import { ApiService } from '../../../services/api.service';
 import { ConfigService } from '../../../services/config.service';
+import { PermisosService } from '../../../services/permisos.service';
 import { CrearRolComponent } from './crear-rol/crear-rol';
 import { EliminarRolComponent } from './eliminar-rol/eliminar-rol';
 
@@ -41,11 +42,15 @@ import { EliminarRolComponent } from './eliminar-rol/eliminar-rol';
 export class RolComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = ['id', 'name', 'permisos', 'acciones'];
   dataSource: Rol[] = [];
-  
+
   totalItems = 0;
   pageSize = 10;
   currentPage = 0;
   isLoading = false;
+
+  puedeCrear = false;
+  puedeEditar = false;
+  puedeEliminar = false;
 
   private apiUrl: string;
   private destroy$ = new Subject<void>();
@@ -54,13 +59,21 @@ export class RolComponent implements OnInit, OnDestroy {
     private apiService: ApiService,
     private configService: ConfigService,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private permisosService: PermisosService
   ) {
     this.apiUrl = this.configService.getApiUrl('roles');
   }
 
   ngOnInit(): void {
+    this.verificarPermisos();
     this.loadRoles();
+  }
+
+  private verificarPermisos(): void {
+    this.puedeCrear = this.permisosService.puedeCrearRol();
+    this.puedeEditar = this.permisosService.puedeEditarRol();
+    this.puedeEliminar = this.permisosService.puedeEliminarRol();
   }
 
   ngOnDestroy(): void {

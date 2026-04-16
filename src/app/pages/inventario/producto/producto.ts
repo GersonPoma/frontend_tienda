@@ -14,6 +14,7 @@ import { Pagination } from 'src/app/models/pagination.model';
 import { Producto } from 'src/app/models/inventario/producto.model';
 import { ApiService } from 'src/app/services/api.service';
 import { ConfigService } from 'src/app/services/config.service';
+import { PermisosService } from 'src/app/services/permisos.service';
 import { CrearProductoComponent } from './crear-producto/crear-producto';
 import { EliminarProductoComponent } from './eliminar-producto/eliminar-producto';
 import { DetallesProductoComponent } from './detalles-producto/detalles-producto';
@@ -39,11 +40,15 @@ import { DetallesProductoComponent } from './detalles-producto/detalles-producto
 export class ProductoComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = ['id', 'codigo', 'nombre', 'precio', 'categoria_nombre', 'imagenes', 'acciones'];
   dataSource: Producto[] = [];
-    
+
   totalItems = 0;
   pageSize = 10;
   currentPage = 0;
   isLoading = false;
+
+  puedeCrear = false;
+  puedeEditar = false;
+  puedeEliminar = false;
 
   private apiUrl: string;
   private destroy$ = new Subject<void>();
@@ -52,13 +57,21 @@ export class ProductoComponent implements OnInit, OnDestroy {
     private apiService: ApiService,
     private configService: ConfigService,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private permisosService: PermisosService
   ) {
     this.apiUrl = this.configService.getApiUrl('productos');
   }
 
   ngOnInit(): void {
+    this.verificarPermisos();
     this.loadProductos();
+  }
+
+  private verificarPermisos(): void {
+    this.puedeCrear = this.permisosService.puedeCrearProducto();
+    this.puedeEditar = this.permisosService.puedeEditarProducto();
+    this.puedeEliminar = this.permisosService.puedeEliminarProducto();
   }  
 
   ngOnDestroy(): void {
