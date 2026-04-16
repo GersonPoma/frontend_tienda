@@ -14,6 +14,7 @@ import { takeUntil } from 'rxjs/operators';
 
 import { ApiService } from '../../../services/api.service';
 import { ConfigService } from '../../../services/config.service';
+import { PermisosService } from '../../../services/permisos.service';
 import { Pagination } from '../../../models/pagination.model';
 import { Proveedor } from '../../../models/inventario/proveedor.model';
 import { CrearProveedorComponent } from './crear-proveedor/crear-proveedor';
@@ -43,21 +44,44 @@ export class ProveedorComponent implements OnInit, OnDestroy {
   currentPage = 0;
   isLoading = false;
 
+  // Permisos
+  puedeVer = true;
+  puedeCrear = false;
+  puedeEditar = false;
+  puedeEliminar = false;
+
   private apiUrl: string;
   private destroy$ = new Subject<void>();
 
   constructor(
     private apiService: ApiService,
     private configService: ConfigService,
+    private permisosService: PermisosService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private cdr: ChangeDetectorRef
   ) {
     this.apiUrl = this.configService.getApiUrl('proveedores');
+    this.verificarPermisos();
   }
 
   ngOnInit(): void {
+    // Verificar si puede ver proveedores
+    if (!this.puedeVer) {
+      this.snackBar.open('No tienes permiso para ver proveedores', 'Cerrar', { duration: 5000 });
+      return;
+    }
     this.loadProveedores();
+  }
+
+  /**
+   * Verificar permisos del usuario
+   */
+  private verificarPermisos(): void {
+    this.puedeVer = this.permisosService.puedeVerProveedor();
+    this.puedeCrear = this.permisosService.puedeCrearProveedor();
+    this.puedeEditar = this.permisosService.puedeEditarProveedor();
+    this.puedeEliminar = this.permisosService.puedeEliminarProveedor();
   }
 
   loadProveedores(): void {
@@ -91,6 +115,11 @@ export class ProveedorComponent implements OnInit, OnDestroy {
   }
 
   crearProveedor(): void {
+    if (!this.puedeCrear) {
+      this.snackBar.open('No tienes permiso para crear proveedores', 'Cerrar', { duration: 5000 });
+      return;
+    }
+
     const dialogRef = this.dialog.open(CrearProveedorComponent, {
       width: '600px',
       maxWidth: '90vw',
@@ -109,6 +138,11 @@ export class ProveedorComponent implements OnInit, OnDestroy {
   }
 
   editarProveedor(proveedor: Proveedor): void {
+    if (!this.puedeEditar) {
+      this.snackBar.open('No tienes permiso para editar proveedores', 'Cerrar', { duration: 5000 });
+      return;
+    }
+
     const dialogRef = this.dialog.open(CrearProveedorComponent, {
       width: '600px',
       maxWidth: '90vw',
@@ -126,9 +160,13 @@ export class ProveedorComponent implements OnInit, OnDestroy {
   }
 
   eliminarProveedor(proveedor: Proveedor): void {
+    if (!this.puedeEliminar) {
+      this.snackBar.open('No tienes permiso para eliminar proveedores', 'Cerrar', { duration: 5000 });
+      return;
+    }
+
     const dialogRef = this.dialog.open(EliminarProveedorComponent, {
       width: '500px',
-      maxWidth: '90vw',
       data: { proveedor }
     });
 

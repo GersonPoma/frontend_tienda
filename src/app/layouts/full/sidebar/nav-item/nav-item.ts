@@ -10,4 +10,5 @@ export interface NavItem {
   chipClass?: string;
   external?: boolean;
   subItemIcon?: boolean;
+  permiso?: string | string[];  // Permiso requerido para mostrar este item
 }

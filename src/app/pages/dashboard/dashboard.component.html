@@ -1,0 +1,29 @@
+<div class="p-24">
+  <div class="m-b-32">
+    <h1 class="text-primary f-w-600">¡Bienvenido!</h1>
+    <p *ngIf="isSuperuser" class="badge badge-admin">Administrador</p>
+  </div>
+
+  <!-- Inventario -->
+  <div *ngIf="tieneAccesoInventario" class="m-b-32">
+    <h3>Inventario</h3>
+    <div class="d-flex gap-12">
+      <a *ngIf="tieneAccesoProductos" routerLink="/inventario/productos" class="btn btn-primary">Productos</a>
+      <a *ngIf="tieneAccesoCategorias" routerLink="/inventario/categorias" class="btn btn-primary">Categorías</a>
+      <a *ngIf="tieneAccesoProveedores" routerLink="/inventario/proveedores" class="btn btn-primary">Proveedores</a>
+    </div>
+  </div>
+
+  <!-- Seguridad -->
+  <div *ngIf="tieneAccesoSeguridad" class="m-b-32">
+    <h3>Seguridad</h3>
+    <div class="d-flex gap-12">
+      <a *ngIf="tieneAccesoUsuarios" routerLink="/seguridad/usuarios" class="btn btn-primary">Usuarios</a>
+    </div>
+  </div>
+
+  <!-- Sin acceso -->
+  <div *ngIf="!tieneAccesoInventario && !tieneAccesoSeguridad" class="text-center">
+    <p>No tienes acceso a ningún módulo</p>
+  </div>
+</div>
