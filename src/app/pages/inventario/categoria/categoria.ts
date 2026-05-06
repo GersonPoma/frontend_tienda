@@ -14,10 +14,7 @@ import { Pagination } from 'src/app/models/pagination.model';
 import { Categoria } from 'src/app/models/inventario/categoria.model';
 import { ApiService } from 'src/app/services/api.service';
 import { ConfigService } from 'src/app/services/config.service';
-<<<<<<< HEAD
-=======
 import { PermisosService } from 'src/app/services/permisos.service';
->>>>>>> repo2/main
 import { CrearCategoriaComponent } from './crear-categoria/crear-categoria';
 import { EliminarCategoriaComponent } from './eliminar-categoria/eliminar-categoria';
 
@@ -42,23 +39,16 @@ import { EliminarCategoriaComponent } from './eliminar-categoria/eliminar-catego
 export class CategoriaComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = ['id', 'nombre', 'acciones'];
   dataSource: Categoria[] = [];
-<<<<<<< HEAD
-    
-=======
 
->>>>>>> repo2/main
   totalItems = 0;
   pageSize = 10;
   currentPage = 0;
   isLoading = false;
 
-<<<<<<< HEAD
-=======
   puedeCrear = false;
   puedeEditar = false;
   puedeEliminar = false;
 
->>>>>>> repo2/main
   private apiUrl: string;
   private destroy$ = new Subject<void>();
 
@@ -66,20 +56,13 @@ export class CategoriaComponent implements OnInit, OnDestroy {
     private apiService: ApiService,
     private configService: ConfigService,
     private snackBar: MatSnackBar,
-<<<<<<< HEAD
-    private dialog: MatDialog
-=======
     private dialog: MatDialog,
     private permisosService: PermisosService
->>>>>>> repo2/main
   ) {
     this.apiUrl = this.configService.getApiUrl('categorias');
   }
 
   ngOnInit(): void {
-<<<<<<< HEAD
-    this.loadCategorias();
-=======
     this.verificarPermisos();
     this.loadCategorias();
   }
@@ -88,7 +71,6 @@ export class CategoriaComponent implements OnInit, OnDestroy {
     this.puedeCrear = this.permisosService.puedeCrearCategoria();
     this.puedeEditar = this.permisosService.puedeEditarCategoria();
     this.puedeEliminar = this.permisosService.puedeEliminarCategoria();
->>>>>>> repo2/main
   }  
 
   ngOnDestroy(): void {
