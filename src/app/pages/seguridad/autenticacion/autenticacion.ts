@@ -131,8 +131,10 @@ export class Autenticacion implements OnInit, OnDestroy {
           this.snackBar.open(`¡Bienvenido ${response.username}!`, 'Cerrar', {
             duration: 3000
           });
-          // Redirigir a seguridad/usuarios después del login exitoso
-          this.router.navigate(['/seguridad/usuarios']);
+          // Pequeño delay para asegurar que se guardaron todos los datos
+          setTimeout(() => {
+            this.router.navigate(['/']);
+          }, 500);
         },
         error: (error) => {
           this.isLoading = false;

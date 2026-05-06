@@ -1,31 +1,48 @@
 import { NavItem } from './nav-item/nav-item';
+import { PermisosService } from '../../../services/permisos.service';
 
 export const navItems: NavItem[] = [
   {
     navCap: 'Seguridad',
+    permiso: [PermisosService.SEGURIDAD_VIEW_USUARIO, PermisosService.AUTH_VIEW_GROUP],
   },
   {
     displayName: 'Usuarios',
     iconName: 'solar:user-id-line-duotone',
     route: '/seguridad/usuarios',
+    permiso: PermisosService.SEGURIDAD_VIEW_USUARIO
   },
   {
     displayName: 'Roles',
     iconName: 'solar:lock-password-unlocked-line-duotone',
     route: '/seguridad/roles',
+    permiso: PermisosService.AUTH_VIEW_GROUP
   },
   {
     navCap: 'Inventario',
+    permiso: [
+      PermisosService.INVENTARIO_VIEW_CATEGORIA,
+      PermisosService.INVENTARIO_VIEW_PRODUCTO,
+      PermisosService.INVENTARIO_VIEW_PROVEEDOR,
+    ],
   },
   {
     displayName: 'Categorías',
     iconName: 'solar:tag-line-duotone',
     route: '/inventario/categorias',
+    permiso: PermisosService.INVENTARIO_VIEW_CATEGORIA
   },
   {
     displayName: 'Productos',
     iconName: 'solar:shop-2-line-duotone',
     route: '/inventario/productos',
+    permiso: PermisosService.INVENTARIO_VIEW_PRODUCTO
+  },
+  {
+    displayName: 'Proveedores',
+    iconName: 'solar:bag-3-line-duotone',
+    route: '/inventario/proveedores',
+    permiso: PermisosService.INVENTARIO_VIEW_PROVEEDOR
   },
   // {
   //   navCap: 'Home',

@@ -56,3 +56,36 @@
     flex-direction: column;
   }
 }
+
+// Page layout utilities
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.p-y-40 {
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+}
+
+.empty-icon {
+  font-size: 48px !important;
+  width: 48px !important;
+  height: 48px !important;
+  color: #ccc !important;
+}
+
+.empty-text {
+  color: #999;
+  margin-top: 16px;
+}

@@ -1,20 +1,29 @@
 <mat-card>
   <mat-card-header>
     <div class="page-header">
-      <mat-card-title>Gestión de Categorías</mat-card-title>
-      <button *ngIf="puedeCrear" mat-raised-button color="primary" (click)="crearCategoria()">
+      <mat-card-title>Gestión de Proveedores</mat-card-title>
+      <button 
+        *ngIf="puedeCrear"
+        mat-raised-button 
+        color="primary" 
+        (click)="crearProveedor()">
         <mat-icon class="m-r-8">add</mat-icon>
-        Crear Nueva Categoría
+        Crear Nuevo Proveedor
       </button>
     </div>
   </mat-card-header>
 
   <mat-card-content>
-    <div *ngIf="isLoading" class="d-flex justify-content-center p-y-40">
+    <div *ngIf="!puedeVer" class="empty-state">
+      <mat-icon class="empty-icon">lock</mat-icon>
+      <p class="empty-text">No tienes permiso para acceder a esta sección</p>
+    </div>
+
+    <div *ngIf="puedeVer && isLoading" class="d-flex justify-content-center p-y-40">
       <mat-spinner diameter="50"></mat-spinner>
     </div>
 
-    <div *ngIf="!isLoading && dataSource.length > 0" class="table-responsive">
+    <div *ngIf="puedeVer && !isLoading && dataSource.length > 0" class="table-responsive">
       <table mat-table [dataSource]="dataSource" class="w-full">
         <ng-container matColumnDef="id">
           <th mat-header-cell *matHeaderCellDef>ID</th>
@@ -26,22 +35,32 @@
           <td mat-cell *matCellDef="let element">{{ element.nombre }}</td>
         </ng-container>
 
+        <ng-container matColumnDef="direccion">
+          <th mat-header-cell *matHeaderCellDef>Dirección</th>
+          <td mat-cell *matCellDef="let element">{{ element.direccion || '-' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="telefono">
+          <th mat-header-cell *matHeaderCellDef>Teléfono</th>
+          <td mat-cell *matCellDef="let element">{{ element.telefono || '-' }}</td>
+        </ng-container>
+
         <ng-container matColumnDef="acciones">
           <th mat-header-cell *matHeaderCellDef>Acciones</th>
           <td mat-cell *matCellDef="let element">
-            <button
+            <button 
               *ngIf="puedeEditar"
-              mat-icon-button
-              matTooltip="Editar"
-              (click)="editarCategoria(element)"
+              mat-icon-button 
+              matTooltip="Editar" 
+              (click)="editarProveedor(element)" 
               color="primary">
               <mat-icon>edit</mat-icon>
             </button>
-            <button
+            <button 
               *ngIf="puedeEliminar"
-              mat-icon-button
-              matTooltip="Eliminar"
-              (click)="eliminarCategoria(element)"
+              mat-icon-button 
+              matTooltip="Eliminar" 
+              (click)="eliminarProveedor(element)" 
               color="warn">
               <mat-icon>delete</mat-icon>
             </button>
@@ -53,13 +72,13 @@
       </table>
     </div>
 
-    <div *ngIf="!isLoading && dataSource.length === 0" class="empty-state">
+    <div *ngIf="puedeVer && !isLoading && dataSource.length === 0" class="empty-state">
       <mat-icon class="empty-icon">info</mat-icon>
-      <p class="empty-text">No hay categorías disponibles</p>
+      <p class="empty-text">No hay proveedores disponibles</p>
     </div>
 
     <mat-paginator
-      *ngIf="dataSource.length > 0"
+      *ngIf="puedeVer && dataSource.length > 0"
       [length]="totalItems"
       [pageSize]="pageSize"
       hidePageSize="true"

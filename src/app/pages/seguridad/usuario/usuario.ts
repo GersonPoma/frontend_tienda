@@ -15,6 +15,7 @@ import { Pagination } from 'src/app/models/pagination.model';
 import { Usuario } from 'src/app/models/seguridad/Usuario.model';
 import { ApiService } from 'src/app/services/api.service';
 import { ConfigService } from 'src/app/services/config.service';
+import { PermisosService } from 'src/app/services/permisos.service';
 import { CrearUsuarioComponent } from './crear-usuario/crear-usuario';
 import { EliminarUsuarioComponent } from './eliminar-usuario/eliminar-usuario';
 
@@ -38,13 +39,17 @@ import { EliminarUsuarioComponent } from './eliminar-usuario/eliminar-usuario';
   styleUrl: './usuario.scss',
 })
 export class UsuarioComponent implements OnInit, OnDestroy {
-  displayedColumns: string[] = ['id', 'username', 'nombre', 'apellido', 'grupos', 'is_superuser', 'acciones'];
+  displayedColumns: string[] = ['id', 'username', 'email', 'nombre', 'apellido', 'grupos', 'is_superuser', 'acciones'];
   dataSource: Usuario[] = [];
-    
+
   totalItems = 0;
   pageSize = 10;
   currentPage = 0;
   isLoading = false;
+
+  puedeCrear = false;
+  puedeEditar = false;
+  puedeEliminar = false;
 
   private apiUrl: string;
   private destroy$ = new Subject<void>();
@@ -53,13 +58,21 @@ export class UsuarioComponent implements OnInit, OnDestroy {
     private apiService: ApiService,
     private configService: ConfigService,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private permisosService: PermisosService
   ) {
     this.apiUrl = this.configService.getApiUrl('usuarios');
   }
 
   ngOnInit(): void {
+    this.verificarPermisos();
     this.loadUsuarios();
+  }
+
+  private verificarPermisos(): void {
+    this.puedeCrear = this.permisosService.puedeCrearUsuario();
+    this.puedeEditar = this.permisosService.puedeEditarUsuario();
+    this.puedeEliminar = this.permisosService.puedeEliminarUsuario();
   }  
 
   ngOnDestroy(): void {

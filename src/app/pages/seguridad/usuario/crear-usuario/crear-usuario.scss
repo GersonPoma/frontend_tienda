@@ -1,1 +1,8 @@
-// Estilos para crear-usuario
+.roles-pagination {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
