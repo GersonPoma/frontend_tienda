@@ -17,6 +17,7 @@ import { ConfigService } from 'src/app/services/config.service';
 import { PermisosService } from 'src/app/services/permisos.service';
 import { CrearCategoriaComponent } from './crear-categoria/crear-categoria';
 import { EliminarCategoriaComponent } from './eliminar-categoria/eliminar-categoria';
+import { MarcaComponent } from '../marca/marca';
 
 @Component({
   selector: 'app-categoria',
@@ -31,7 +32,8 @@ import { EliminarCategoriaComponent } from './eliminar-categoria/eliminar-catego
     MatCardModule,
     MatSnackBarModule,
     MatTooltipModule,
-    MatDialogModule
+    MatDialogModule,
+    MarcaComponent
   ],
   templateUrl: './categoria.html',
   styleUrl: './categoria.scss',

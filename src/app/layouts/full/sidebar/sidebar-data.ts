@@ -23,7 +23,6 @@ export const navItems: NavItem[] = [
     permiso: [
       PermisosService.INVENTARIO_VIEW_CATEGORIA,
       PermisosService.INVENTARIO_VIEW_PRODUCTO,
-      PermisosService.INVENTARIO_VIEW_PROVEEDOR,
     ],
   },
   {
@@ -39,10 +38,36 @@ export const navItems: NavItem[] = [
     permiso: PermisosService.INVENTARIO_VIEW_PRODUCTO
   },
   {
+    navCap: 'Compras',
+    permiso: [
+      PermisosService.COMPRA_VIEW_PROVEEDOR,
+    ],
+  },
+  {
     displayName: 'Proveedores',
     iconName: 'solar:bag-3-line-duotone',
-    route: '/inventario/proveedores',
-    permiso: PermisosService.INVENTARIO_VIEW_PROVEEDOR
+    route: '/compra/proveedores',
+    permiso: PermisosService.COMPRA_VIEW_PROVEEDOR
+  },
+  {
+    navCap: 'Ventas',
+    permiso: [
+      PermisosService.VENTA_VIEW_VENTA,
+    ],
+  },
+  {
+    displayName: 'Ventas',
+    iconName: 'solar:cart-check-line-duotone',
+    route: '/ventas',
+    permiso: PermisosService.VENTA_VIEW_VENTA
+  },
+  {
+    navCap: 'Reportes',
+  },
+  {
+    displayName: 'Reportes',
+    iconName: 'solar:chart-square-line-duotone',
+    route: '/reportes',
   },
   // {
   //   navCap: 'Home',

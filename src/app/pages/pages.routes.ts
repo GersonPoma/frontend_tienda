@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { StarterComponent } from './starter/starter.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 
 export const PagesRoutes: Routes = [
@@ -20,5 +19,20 @@ export const PagesRoutes: Routes = [
     path: 'inventario',
     loadChildren: () =>
       import('./inventario/inventario.routes').then((m) => m.InventarioRoutes),
+  },
+  {
+    path: 'compra',
+    loadChildren: () =>
+      import('./compra/compra.routes').then((m) => m.CompraRoutes),
+  },
+  {
+    path: 'reportes',
+    loadChildren: () =>
+      import('./reportes/reportes.routes').then((m) => m.ReportesRoutes),
+  },
+  {
+    path: 'ventas',
+    loadChildren: () =>
+      import('./venta/venta.routes').then((m) => m.VentaRoutes),
   },
 ];

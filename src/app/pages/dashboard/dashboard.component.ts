@@ -66,7 +66,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       PermisosService.INVENTARIO_VIEW_CATEGORIA
     );
     this.tieneAccesoProveedores = this.authService.hasPermiso(
-      PermisosService.INVENTARIO_VIEW_PROVEEDOR
+      PermisosService.COMPRA_VIEW_PROVEEDOR
     );
     this.tieneAccesoInventario =
       this.tieneAccesoProductos ||
