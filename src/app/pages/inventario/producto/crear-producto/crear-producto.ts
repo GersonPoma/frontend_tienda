@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy, Inject, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -10,12 +9,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Subject, takeUntil } from 'rxjs';
 
 import { ApiService } from '../../../../services/api.service';
 import { ConfigService } from '../../../../services/config.service';
 import { Categoria } from '../../../../models/inventario/categoria.model';
-import { Producto, CrearMultimedia } from '../../../../models/inventario/producto.model';
+import { Marca } from '../../../../models/inventario/marca.model';
 import { Pagination } from '../../../../models/pagination.model';
 
 @Component({
@@ -31,7 +31,8 @@ import { Pagination } from '../../../../models/pagination.model';
     MatProgressSpinnerModule,
     MatSnackBarModule,
     MatIconModule,
-    MatSelectModule
+    MatSelectModule,
+    MatCheckboxModule
   ],
   templateUrl: './crear-producto.html',
   styleUrl: './crear-producto.scss'
@@ -39,12 +40,13 @@ import { Pagination } from '../../../../models/pagination.model';
 export class CrearProductoComponent implements OnInit, OnDestroy {
   form: FormGroup;
   categorias: Categoria[] = [];
+  marcas: Marca[] = [];
   isSaving = false;
   isEditMode = false;
   isLoadingCategorias = false;
-  
+  isLoadingMarcas = false;
+
   private destroy$ = new Subject<void>();
-  private multimediaUrl: string;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -56,19 +58,19 @@ export class CrearProductoComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.isEditMode = !!data?.producto;
-    this.multimediaUrl = this.configService.getApiUrl('multimedios');
-    
+
     this.form = this.formBuilder.group({
-      codigo: [data?.producto?.codigo || '', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
       nombre: [data?.producto?.nombre || '', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
-      precio: [data?.producto?.precio || '', [Validators.required, Validators.min(0)]],
+      descripcion: [data?.producto?.descripcion || ''],
+      activo: [data?.producto?.activo ?? true],
       categoria_id: [data?.producto?.categoria || '', Validators.required],
-      imagen_principal: [data?.producto?.imagenes?.find((i: any) => i.es_principal)?.id || null]
+      marca_id: [data?.producto?.marca || '', Validators.required]
     });
   }
 
   ngOnInit(): void {
     this.cargarCategorias();
+    this.cargarMarcas();
   }
 
   ngOnDestroy(): void {
@@ -95,9 +97,26 @@ export class CrearProductoComponent implements OnInit, OnDestroy {
       });
   }
 
+  private cargarMarcas(): void {
+    this.isLoadingMarcas = true;
+    const url = this.configService.getApiUrl('marcas');
+
+    this.apiService.getWithPagination<Marca>(url, 1, 100)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data: Pagination<Marca>) => {
+          this.marcas = data.results;
+          this.isLoadingMarcas = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.isLoadingMarcas = false;
+          this.snackBar.open('Error al cargar marcas', 'Cerrar', { duration: 5000 });
+        }
+      });
+  }
+
   guardar(): void {
-    console.log('Guardar clicked - isEditMode:', this.isEditMode, 'form.valid:', this.form.valid);
-    
     if (this.form.invalid) {
       this.snackBar.open('Por favor completa todos los campos requeridos', 'Cerrar', { duration: 3000 });
       return;
@@ -106,22 +125,20 @@ export class CrearProductoComponent implements OnInit, OnDestroy {
     this.isSaving = true;
     const formValues = this.form.value;
     const url = this.configService.getApiUrl('productos');
-    console.log('URL:', url, 'producto id:', this.data?.producto?.id);
-    
+
     const productoData = {
-      codigo: formValues.codigo,
       nombre: formValues.nombre,
-      precio: Number(formValues.precio),
-      categoria_id: Number(formValues.categoria_id)
+      descripcion: formValues.descripcion,
+      activo: formValues.activo,
+      categoria_id: Number(formValues.categoria_id),
+      marca_id: Number(formValues.marca_id)
     };
 
     if (this.isEditMode) {
-      console.log('Updating producto:', this.data?.producto?.id);
       this.apiService.update(url, this.data.producto.id, productoData)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: (response: any) => {
-            console.log('Update response:', response);
+          next: () => {
             this.isSaving = false;
             this.snackBar.open('Producto actualizado exitosamente', 'OK', { duration: 3000 });
             this.dialogRef.close(true);
@@ -133,12 +150,10 @@ export class CrearProductoComponent implements OnInit, OnDestroy {
           }
         });
     } else {
-      console.log('Creating producto');
       this.apiService.create(url, productoData)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: (response: any) => {
-            console.log('Create response:', response);
+          next: (response) => {
             this.isSaving = false;
             this.snackBar.open('Producto creado exitosamente', 'OK', { duration: 3000 });
             this.dialogRef.close(response);
@@ -150,64 +165,6 @@ export class CrearProductoComponent implements OnInit, OnDestroy {
           }
         });
     }
-  }
-
-private actualizarImagenPrincipal(productoId: number, imagenId: number | null): void {
-    if (!imagenId) {
-      this.dialogRef.close(true);
-      return;
-    }
-
-    this.isSaving = true;
-    this.apiService.getAll<any>(this.multimediaUrl, { producto_id: productoId })
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (imagenes: any[]) => {
-          if (imagenes.length === 0) {
-            this.isSaving = false;
-            this.dialogRef.close(true);
-            return;
-          }
-
-          let updatesCompleted = 0;
-          const imagesToUpdate = imagenes.filter(img => img.es_principal !== (img.id === imagenId));
-          const totalUpdates = imagesToUpdate.length;
-
-          if (totalUpdates === 0) {
-            this.isSaving = false;
-            this.snackBar.open('Producto actualizado', 'OK', { duration: 3000 });
-            this.dialogRef.close(true);
-            return;
-          }
-
-          imagesToUpdate.forEach(img => {
-            this.apiService.patch(this.multimediaUrl, img.id, { es_principal: img.id === imagenId })
-              .pipe(takeUntil(this.destroy$))
-              .subscribe({
-                next: () => {
-                  updatesCompleted++;
-                  if (updatesCompleted >= totalUpdates) {
-                    this.isSaving = false;
-                    this.snackBar.open('Producto actualizado', 'OK', { duration: 3000 });
-                    this.dialogRef.close(true);
-                  }
-                },
-                error: () => {
-                  updatesCompleted++;
-                  if (updatesCompleted >= totalUpdates) {
-                    this.isSaving = false;
-                    this.dialogRef.close(true);
-                  }
-                }
-              });
-          });
-        },
-        error: () => {
-          this.isSaving = false;
-          this.snackBar.open('Producto actualizado', 'OK', { duration: 3000 });
-          this.dialogRef.close(true);
-        }
-      });
   }
 
   cancelar(): void {

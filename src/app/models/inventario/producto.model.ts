@@ -1,32 +1,34 @@
 export interface Multimedia {
   id: number;
-  nombre: string;
   archivo_url: string;
+  tipo: string;
   es_principal: boolean;
   orden: number;
 }
 
 export interface Producto {
   id: number;
-  codigo: string;
   nombre: string;
-  precio: number;
+  descripcion: string;
+  activo: boolean;
   categoria: number;
   categoria_nombre: string;
+  marca: number;
+  marca_nombre: string;
   imagenes: Multimedia[];
 }
 
 export interface CrearProducto {
-  codigo: string;
   nombre: string;
-  precio: number;
+  descripcion?: string;
+  activo?: boolean;
   categoria_id: number;
+  marca_id: number;
 }
 
 export interface CrearMultimedia {
-  nombre: string;
   archivo_url: string;
-  tipo: 'imagen';
+  tipo: string;
   es_principal: boolean;
   orden: number;
   producto_id: number;

@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -17,13 +18,13 @@ import { ConfigService } from 'src/app/services/config.service';
 import { PermisosService } from 'src/app/services/permisos.service';
 import { CrearProductoComponent } from './crear-producto/crear-producto';
 import { EliminarProductoComponent } from './eliminar-producto/eliminar-producto';
-import { DetallesProductoComponent } from './detalles-producto/detalles-producto';
 
 @Component({
   selector: 'app-producto',
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     MatTableModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
@@ -38,7 +39,7 @@ import { DetallesProductoComponent } from './detalles-producto/detalles-producto
   styleUrl: './producto.scss',
 })
 export class ProductoComponent implements OnInit, OnDestroy {
-  displayedColumns: string[] = ['id', 'codigo', 'nombre', 'precio', 'categoria_nombre', 'imagenes', 'acciones'];
+  displayedColumns: string[] = ['id', 'nombre', 'categoria_nombre', 'marca_nombre', 'imagenes', 'acciones'];
   dataSource: Producto[] = [];
 
   totalItems = 0;
@@ -58,7 +59,8 @@ export class ProductoComponent implements OnInit, OnDestroy {
     private configService: ConfigService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
-    private permisosService: PermisosService
+    private permisosService: PermisosService,
+    private router: Router
   ) {
     this.apiUrl = this.configService.getApiUrl('productos');
   }
@@ -72,7 +74,7 @@ export class ProductoComponent implements OnInit, OnDestroy {
     this.puedeCrear = this.permisosService.puedeCrearProducto();
     this.puedeEditar = this.permisosService.puedeEditarProducto();
     this.puedeEliminar = this.permisosService.puedeEliminarProducto();
-  }  
+  }
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -166,21 +168,7 @@ export class ProductoComponent implements OnInit, OnDestroy {
   }
 
   verDetalles(producto: Producto): void {
-    const dialogRef = this.dialog.open(DetallesProductoComponent, {
-      width: '800px',
-      maxWidth: '95vw',
-      disableClose: false,
-      panelClass: ['detalles-producto-dialog'],
-      data: { producto }
-    });
-
-    dialogRef.afterClosed()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(result => {
-        if (result) {
-          this.loadProductos();
-        }
-      });
+    this.router.navigate(['/inventario/productos', producto.id]);
   }
 
   getImagenPrincipal(producto: Producto): string | null {

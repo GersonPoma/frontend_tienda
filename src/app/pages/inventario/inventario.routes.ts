@@ -3,13 +3,10 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { CategoriaComponent } from './categoria/categoria';
 import { ProductoComponent } from './producto/producto';
-import { ProveedorComponent } from './proveedor/proveedor';
+import { DetallesProductoPageComponent } from './producto/detalles-producto-page/detalles-producto-page';
 import { PermisosService } from '../../services/permisos.service';
 import { AuthService } from '../../services/auth.service';
 
-/**
- * Guard funcional para verificar permisos
- */
 const canAccessWithPermiso = (permisos: string | string[]) => {
   return () => {
     const authService = inject(AuthService);
@@ -37,8 +34,8 @@ export const InventarioRoutes: Routes = [
     canActivate: [canAccessWithPermiso(PermisosService.INVENTARIO_VIEW_PRODUCTO)]
   },
   {
-    path: 'proveedores',
-    component: ProveedorComponent,
-    canActivate: [canAccessWithPermiso(PermisosService.INVENTARIO_VIEW_PROVEEDOR)]
+    path: 'productos/:id',
+    component: DetallesProductoPageComponent,
+    canActivate: [canAccessWithPermiso(PermisosService.INVENTARIO_VIEW_PRODUCTO)]
   },
 ];
