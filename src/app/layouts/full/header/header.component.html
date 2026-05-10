@@ -7,7 +7,14 @@
   <!-- Spacer para empujar el menú de usuario a la derecha -->
   <span class="spacer"></span>
 
+  <!-- Carrito de Compras -->
+  <button mat-icon-button routerLink="/extra/carrito" matTooltip="Ver Carrito" class="m-r-8">
+    <mat-icon [matBadge]="cartService.obtenerCantidadItems()" matBadgeColor="warn" [matBadgeHidden]="cartService.obtenerCantidadItems() === 0">shopping_cart</mat-icon>
+
+  </button>
+
   <!-- Menú de Usuario -->
+
   <button 
     mat-button 
     [matMenuTriggerFor]="userMenu"

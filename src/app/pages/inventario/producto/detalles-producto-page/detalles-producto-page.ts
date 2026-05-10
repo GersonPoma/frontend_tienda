@@ -14,6 +14,8 @@ import { Subject, takeUntil } from 'rxjs';
 
 import { ConfigService } from '../../../../services/config.service';
 import { ApiService } from '../../../../services/api.service';
+import { CartService } from '../../../../services/cart.service';
+
 import { Producto, Multimedia } from '../../../../models/inventario/producto.model';
 import { VarianteProducto } from '../../../../models/inventario/variante.model';
 import { Pagination } from '../../../../models/pagination.model';
@@ -63,7 +65,9 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
     private apiService: ApiService,
     private configService: ConfigService,
     private snackBar: MatSnackBar,
+    private cartService: CartService,
     private dialog: MatDialog
+
   ) {
     this.productoId = Number(this.route.snapshot.paramMap.get('id'));
     this.multimediaUrl = this.configService.getApiUrl('multimedios');
@@ -280,4 +284,23 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
         }
       });
   }
+  
+  agregarAlCarrito(variante: VarianteProducto): void {
+    this.cartService.agregarProducto(variante.id, 1).subscribe({
+      next: () => {
+        this.snackBar.open('¡Producto añadido al carrito!', 'Ver Carrito', { 
+          duration: 3000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top'
+        }).onAction().subscribe(() => {
+          this.router.navigate(['/extra/carrito']);
+        });
+      },
+      error: (err) => {
+        const msg = err.error?.error || 'No se pudo añadir al carrito';
+        this.snackBar.open(msg, 'Cerrar', { duration: 3000 });
+      }
+    });
+  }
 }
+

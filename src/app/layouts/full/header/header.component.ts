@@ -18,6 +18,8 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from 'src/app/services/auth.service';
+import { CartService } from 'src/app/services/cart.service';
+
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -49,8 +51,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   constructor(
     private authService: AuthService,
+    public cartService: CartService,
     private router: Router
   ) {}
+
 
   ngOnInit(): void {
     this.obtenerUsuarioActual();

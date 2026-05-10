@@ -26,7 +26,13 @@ export const navItems: NavItem[] = [
     ],
   },
   {
+    displayName: 'Catálogo',
+    iconName: 'solar:widget-2-line-duotone',
+    route: '/extra/catalogo',
+  },
+  {
     displayName: 'Categorías',
+
     iconName: 'solar:tag-line-duotone',
     route: '/inventario/categorias',
     permiso: PermisosService.INVENTARIO_VIEW_CATEGORIA
