@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import { Routes, UrlSegment } from '@angular/router';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { BlankComponent } from './layouts/blank/blank.component';
@@ -20,7 +20,43 @@ const canAccessDashboard = () => {
   return router.createUrlTree(['/login']);
 };
 
+/**
+ * CanMatch para landing publica
+ * Solo aplica en localhost, 127.0.0.1 o campusflow.store
+ * y solo para rutas raiz o /empresa/registro
+ */
+const canMatchPublicLanding = (_route: any, segments: UrlSegment[] = []) => {
+  const hostname = window.location.hostname;
+  const isPublicHost =
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname === 'campusflow.store';
+
+  if (!isPublicHost) {
+    return false;
+  }
+
+  if (segments.length === 0) {
+    return true;
+  }
+
+  return segments[0].path === 'empresa';
+};
+
 export const routes: Routes = [
+  // Landing publica (sin sidebar) solo en host publico
+  {
+    path: '',
+    component: BlankComponent,
+    canMatch: [canMatchPublicLanding],
+    children: [
+      {
+        path: '',
+        loadChildren: () =>
+          import('./pages/empresa/empresa.routes').then((m) => m.EmpresaPublicRoutes),
+      },
+    ],
+  },
   // Rutas CON sidebar (FullComponent) - Dashboard y Administración (va primero)
   {
     path: '',
