@@ -4,6 +4,10 @@ import { Routes } from '@angular/router';
 // pages
 import { AppIconsComponent } from './icons/icons.component';
 import { AppSamplePageComponent } from './sample-page/sample-page.component';
+import { CarritoComponent } from './carrito/carrito';
+import { CatalogoComponent } from './catalogo/catalogo';
+
+
 
 export const ExtraRoutes: Routes = [
   {
@@ -17,6 +21,16 @@ export const ExtraRoutes: Routes = [
         path: 'sample-page',
         component: AppSamplePageComponent,
       },
+      {
+        path: 'carrito',
+        component: CarritoComponent,
+      },
+      {
+        path: 'catalogo',
+        component: CatalogoComponent,
+      },
+
+
     ],
   },
 ];
