@@ -6,7 +6,7 @@
   <form [formGroup]="form" style="display: flex; flex-direction: column; gap: 12px; margin-top: 12px;">
     <mat-form-field appearance="outline" style="width: 100%;">
       <mat-label>Nombre</mat-label>
-      <input matInput formControlName="nombre" placeholder="Ej: Camisa Manga Larga" />
+      <input matInput formControlName="nombre" placeholder="Ej: Sofa 3 plazas, Mesa de comedor" />
       <mat-error *ngIf="form.get('nombre')?.hasError('required')">
         El nombre es requerido
       </mat-error>

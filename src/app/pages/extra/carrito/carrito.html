@@ -6,7 +6,7 @@
     <div *ngIf="!carrito || !carrito.detalles || carrito.detalles.length === 0" class="p-24 text-center">
       <mat-icon style="font-size: 48px; height: 48px; width: 48px; color: #ccc;">shopping_cart</mat-icon>
       <p class="m-t-16 f-w-600">Tu carrito está vacío</p>
-      <button mat-raised-button color="primary" (click)="irAProductos()">Ver Productos</button>
+      <button mat-raised-button color="primary" (click)="irACatalogo()">Ir al catálogo</button>
     </div>
 
     <div *ngIf="carrito && carrito.detalles && carrito.detalles.length > 0">

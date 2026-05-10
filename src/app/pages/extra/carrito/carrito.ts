@@ -67,8 +67,8 @@ export class CarritoComponent implements OnInit {
     });
   }
 
-  irAProductos(): void {
-    this.router.navigate(['/inventario/productos']);
+  irACatalogo(): void {
+    this.router.navigate(['/extra/catalogo']);
   }
 
   descargarPdf(): void {
