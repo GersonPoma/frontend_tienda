@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -33,6 +34,8 @@ interface VarianteDisponible {
 interface ProductoConVariantes {
   producto_id: number;
   producto_nombre: string;
+  categoria_nombre: string;
+  marca_nombre: string;
   imagen_url: string | null;
   variantes: VarianteDisponible[];
 }
@@ -49,6 +52,9 @@ interface CartItem {
 interface UsuarioOption {
   id: number;
   username: string;
+  nombre: string;
+  apellido: string;
+  email: string;
 }
 
 @Component({
@@ -64,6 +70,7 @@ interface UsuarioOption {
     MatIconModule,
     MatInputModule,
     MatSelectModule,
+    MatAutocompleteModule,
     MatFormFieldModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
@@ -87,7 +94,9 @@ export class CrearVentaComponent implements OnInit, OnDestroy {
 
   cartItems: CartItem[] = [];
   usuarios: UsuarioOption[] = [];
-  selectedUsuarioId: number | null = null;
+  filteredUsuarios: UsuarioOption[] = [];
+  usuarioSearchTerm = '';
+  selectedUsuarioObj: UsuarioOption | null = null;
 
   isLoading = false;
   isLoadingUsuarios = false;
@@ -124,7 +133,7 @@ export class CrearVentaComponent implements OnInit, OnDestroy {
   }
 
   get carritoValido(): boolean {
-    return this.cartItems.length > 0 && !!this.selectedUsuarioId;
+    return this.cartItems.length > 0 && !!this.selectedUsuarioObj;
   }
 
   private getProductoImagen(productoId: number): string | null {
@@ -141,9 +150,12 @@ export class CrearVentaComponent implements OnInit, OnDestroy {
 
     for (const v of this.variantes) {
       if (!grouped.has(v.producto)) {
+        const prod = this.productos.find(p => p.id === v.producto);
         grouped.set(v.producto, {
           producto_id: v.producto,
           producto_nombre: v.producto_nombre,
+          categoria_nombre: prod?.categoria_nombre || '',
+          marca_nombre: prod?.marca_nombre || '',
           imagen_url: this.getProductoImagen(v.producto),
           variantes: [],
         });
@@ -209,6 +221,7 @@ export class CrearVentaComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (data) => {
           this.usuarios = data.results;
+          this.filteredUsuarios = data.results;
           this.isLoadingUsuarios = false;
         },
         error: () => {
@@ -226,6 +239,55 @@ export class CrearVentaComponent implements OnInit, OnDestroy {
   onPageChangeProductos(event: PageEvent): void {
     this.currentPageProductos = event.pageIndex;
     this.applyFilterAndPagination();
+  }
+
+  filtrarUsuarios(): void {
+    const term = this.usuarioSearchTerm.toLowerCase().trim();
+    if (!term) {
+      this.filteredUsuarios = this.usuarios;
+    } else {
+      this.filteredUsuarios = this.usuarios.filter(u =>
+        u.username.toLowerCase().includes(term) ||
+        (u.nombre && u.nombre.toLowerCase().includes(term)) ||
+        (u.apellido && u.apellido.toLowerCase().includes(term))
+      );
+    }
+  }
+
+  onUsuarioSelected(event: any): void {
+    this.selectedUsuarioObj = event.option.value;
+    this.usuarioSearchTerm = `${event.option.value.username} — ${event.option.value.nombre || ''} ${event.option.value.apellido || ''}`.trim();
+  }
+
+  limpiarUsuario(): void {
+    this.selectedUsuarioObj = null;
+    this.usuarioSearchTerm = '';
+    this.filteredUsuarios = this.usuarios;
+  }
+
+  decrementarCantidad(varianteId: number): void {
+    const actual = this.cantidadesSeleccionadas[varianteId] || 1;
+    if (actual > 1) {
+      this.cantidadesSeleccionadas[varianteId] = actual - 1;
+    }
+  }
+
+  incrementarCantidad(varianteId: number): void {
+    const variante = this.variantes.find(v => v.id === varianteId);
+    if (!variante) return;
+    const actual = this.cantidadesSeleccionadas[varianteId] || 1;
+    if (actual < variante.cantidad) {
+      this.cantidadesSeleccionadas[varianteId] = actual + 1;
+    }
+  }
+
+  validarCantidad(varianteId: number, max: number): void {
+    const val = this.cantidadesSeleccionadas[varianteId];
+    if (!val || val < 1 || isNaN(val)) {
+      this.cantidadesSeleccionadas[varianteId] = 1;
+    } else if (val > max) {
+      this.cantidadesSeleccionadas[varianteId] = max;
+    }
   }
 
   agregarAlCarrito(varianteId: number): void {
@@ -286,7 +348,7 @@ export class CrearVentaComponent implements OnInit, OnDestroy {
       tipo: 'presencial',
       estado: 'pendiente',
       precio_total: this.totalCarrito,
-      usuario_id: this.selectedUsuarioId,
+      usuario_id: this.selectedUsuarioObj!.id,
       detalles: this.cartItems.map(item => ({
         variante_producto_id: item.variante_producto_id,
         cantidad: item.cantidad,
