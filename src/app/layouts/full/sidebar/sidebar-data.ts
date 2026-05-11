@@ -56,6 +56,12 @@ export const navItems: NavItem[] = [
     permiso: PermisosService.COMPRA_VIEW_PROVEEDOR
   },
   {
+    displayName: 'Compras',
+    iconName: 'solar:clipboard-list-line-duotone',
+    route: '/compra/compras',
+    permiso: PermisosService.COMPRA_VIEW_COMPRA
+  },
+  {
     navCap: 'Ventas',
     permiso: [
       PermisosService.VENTA_VIEW_VENTA,

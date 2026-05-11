@@ -27,6 +27,12 @@ export class PermisosService {
   static readonly COMPRA_CHANGE_PROVEEDOR = 'compras.change_proveedor';
   static readonly COMPRA_DELETE_PROVEEDOR = 'compras.delete_proveedor';
 
+  // COMPRA - COMPRA
+  static readonly COMPRA_VIEW_COMPRA = 'compras.view_compra';
+  static readonly COMPRA_ADD_COMPRA = 'compras.add_compra';
+  static readonly COMPRA_CHANGE_COMPRA = 'compras.change_compra';
+  static readonly COMPRA_DELETE_COMPRA = 'compras.delete_compra';
+
   // INVENTARIO - MARCA
   static readonly INVENTARIO_VIEW_MARCA = 'inventario.view_marca';
   static readonly INVENTARIO_ADD_MARCA = 'inventario.add_marca';
@@ -158,6 +164,23 @@ export class PermisosService {
 
   puedeEliminarProveedor(): boolean {
     return this.tiene(PermisosService.COMPRA_DELETE_PROVEEDOR);
+  }
+
+  // COMPRA
+  puedeVerCompra(): boolean {
+    return this.tiene(PermisosService.COMPRA_VIEW_COMPRA);
+  }
+
+  puedeCrearCompra(): boolean {
+    return this.tiene(PermisosService.COMPRA_ADD_COMPRA);
+  }
+
+  puedeEditarCompra(): boolean {
+    return this.tiene(PermisosService.COMPRA_CHANGE_COMPRA);
+  }
+
+  puedeEliminarCompra(): boolean {
+    return this.tiene(PermisosService.COMPRA_DELETE_COMPRA);
   }
 
   // MARCA
