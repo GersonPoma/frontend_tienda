@@ -2,7 +2,7 @@ import { getAssetFromKV } from "@cloudflare/kv-asset-handler";
 import manifestJSON from "__STATIC_CONTENT_MANIFEST";
 const assetManifest = JSON.parse(manifestJSON);
 
-const BACKEND_URL = "https://campusflow-backend-lobm.onrender.com";
+const BACKEND_URL = "https://api.campusflow.store";
 
 export default {
   async fetch(request, env, ctx) {
