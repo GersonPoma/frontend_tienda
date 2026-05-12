@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { RolComponent } from './rol/rol';
 import { Autenticacion } from './autenticacion/autenticacion';
 import { UsuarioComponent } from './usuario/usuario';
+import { BitacoraAuditoriaComponent } from './bitacora-auditoria/bitacora-auditoria';
 import { RecuperarPasswordComponent } from './recuperar-password/recuperar-password.component';
 import { PermisosService } from '../../services/permisos.service';
 import { AuthService } from '../../services/auth.service';
@@ -17,7 +18,7 @@ const canAccessWithPermiso = (permisos: string | string[]) => {
     const router = inject(Router);
     const permisosArray = Array.isArray(permisos) ? permisos : [permisos];
 
-    if (authService.hasAnyPermiso(permisosArray)) {
+    if (authService.isSuperuser() || authService.hasAnyPermiso(permisosArray)) {
       return true;
     }
 
@@ -71,6 +72,23 @@ export const SeguridadRoutes: Routes = [
       urls: [
         { title: 'Seguridad', url: '/seguridad' },
         { title: 'Usuarios' },
+      ]
+    }
+  },
+  {
+    path: 'bitacora',
+    component: BitacoraAuditoriaComponent,
+    canActivate: [canAccessWithPermiso([
+      PermisosService.SEGURIDAD_VIEW_BITACORA,
+      PermisosService.SEGURIDAD_VIEW_USUARIO,
+      PermisosService.AUTH_VIEW_GROUP,
+      PermisosService.AUTH_VIEW_PERMISSION,
+    ])],
+    data: {
+      title: 'Bitacora de Auditoria',
+      urls: [
+        { title: 'Seguridad', url: '/seguridad' },
+        { title: 'Bitacora de Auditoria' },
       ]
     }
   }

@@ -57,6 +57,9 @@ export class PermisosService {
   static readonly SEGURIDAD_CHANGE_USUARIO = 'seguridad.change_usuario';
   static readonly SEGURIDAD_DELETE_USUARIO = 'seguridad.delete_usuario';
 
+  // SEGURIDAD - BITACORA
+  static readonly SEGURIDAD_VIEW_BITACORA = 'seguridad.view_bitacora';
+
   // AUTH - GRUPO (ROL)
   static readonly AUTH_VIEW_GROUP = 'auth.view_group';
   static readonly AUTH_ADD_GROUP = 'auth.add_group';

@@ -4,7 +4,11 @@ import { PermisosService } from '../../../services/permisos.service';
 export const navItems: NavItem[] = [
   {
     navCap: 'Seguridad',
-    permiso: [PermisosService.SEGURIDAD_VIEW_USUARIO, PermisosService.AUTH_VIEW_GROUP],
+    permiso: [
+      PermisosService.SEGURIDAD_VIEW_USUARIO,
+      PermisosService.AUTH_VIEW_GROUP,
+      PermisosService.SEGURIDAD_VIEW_BITACORA,
+    ],
   },
   {
     displayName: 'Usuarios',
@@ -17,6 +21,17 @@ export const navItems: NavItem[] = [
     iconName: 'solar:lock-password-unlocked-line-duotone',
     route: '/seguridad/roles',
     permiso: PermisosService.AUTH_VIEW_GROUP
+  },
+  {
+    displayName: 'Bitacora',
+    iconName: 'solar:history-line-duotone',
+    route: '/seguridad/bitacora',
+    permiso: [
+      PermisosService.SEGURIDAD_VIEW_BITACORA,
+      PermisosService.SEGURIDAD_VIEW_USUARIO,
+      PermisosService.AUTH_VIEW_GROUP,
+      PermisosService.AUTH_VIEW_PERMISSION,
+    ]
   },
   {
     navCap: 'Inventario',
