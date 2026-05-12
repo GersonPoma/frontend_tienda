@@ -1,7 +1,7 @@
 <div style="padding: 16px;">
   <button mat-button (click)="volver()" style="margin-bottom: 16px;">
     <mat-icon>arrow_back</mat-icon>
-    Volver a Productos
+    {{ isCliente ? 'Volver al Catalogo' : 'Volver a Productos' }}
   </button>
 
   <div *ngIf="isLoading" class="d-flex justify-content-center p-y-40">
@@ -58,7 +58,7 @@
             </div>
 
             <!-- Sección de Imágenes -->
-            <div style="margin-top: 24px;">
+            <div style="margin-top: 24px;" *ngIf="!isCliente">
               <strong>Imágenes del producto:</strong>
 
               <div style="margin-top: 12px; padding: 16px; border: 2px dashed #ccc; border-radius: 8px; text-align: center;">
@@ -118,7 +118,7 @@
                             style="position: absolute; top: -8px; right: -8px; font-size: 18px; width: 18px; height: 18px; background: #4caf50; color: white; border-radius: 50%; padding: 2px;">
                       check
                     </mat-icon>
-                    <div style="display: flex; gap: 4px; margin-top: 4px; justify-content: center;">
+                    <div *ngIf="!isCliente" style="display: flex; gap: 4px; margin-top: 4px; justify-content: center;">
                       <button mat-icon-button
                               matTooltip="Establecer como principal"
                               (click)="establecerPrincipal(img)"
@@ -154,7 +154,7 @@
       <mat-card-header>
         <div class="page-header">
           <mat-card-title>Variantes del Producto</mat-card-title>
-          <button mat-raised-button color="primary" (click)="crearVariante()">
+          <button *ngIf="!isCliente" mat-raised-button color="primary" (click)="crearVariante()">
             <mat-icon class="m-r-8">add</mat-icon>
             Agregar Variante
           </button>
@@ -202,10 +202,10 @@
                 <button mat-icon-button matTooltip="Ver" (click)="verVariante(element)" color="accent">
                   <mat-icon>visibility</mat-icon>
                 </button>
-                <button mat-icon-button matTooltip="Editar" (click)="editarVariante(element)" color="primary">
+                <button *ngIf="!isCliente" mat-icon-button matTooltip="Editar" (click)="editarVariante(element)" color="primary">
                   <mat-icon>edit</mat-icon>
                 </button>
-                <button mat-icon-button matTooltip="Eliminar" (click)="eliminarVariante(element)" color="warn">
+                <button *ngIf="!isCliente" mat-icon-button matTooltip="Eliminar" (click)="eliminarVariante(element)" color="warn">
                   <mat-icon>delete</mat-icon>
                 </button>
               </td>

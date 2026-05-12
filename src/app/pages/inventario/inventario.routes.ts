@@ -22,6 +22,22 @@ const canAccessWithPermiso = (permisos: string | string[]) => {
   };
 };
 
+const canAccessProductoDetalle = (permisos: string | string[]) => {
+  return () => {
+    const authService = inject(AuthService);
+    const router = inject(Router);
+    const permisosArray = Array.isArray(permisos) ? permisos : [permisos];
+    const isCliente = authService.getRoles().some((rol) => rol?.toLowerCase() === 'cliente');
+
+    if (authService.hasAnyPermiso(permisosArray) || isCliente) {
+      return true;
+    }
+
+    router.navigate(['/']);
+    return false;
+  };
+};
+
 export const InventarioRoutes: Routes = [
   {
     path: 'categorias',
@@ -36,6 +52,6 @@ export const InventarioRoutes: Routes = [
   {
     path: 'productos/:id',
     component: DetallesProductoPageComponent,
-    canActivate: [canAccessWithPermiso(PermisosService.INVENTARIO_VIEW_PRODUCTO)]
+    canActivate: [canAccessProductoDetalle(PermisosService.INVENTARIO_VIEW_PRODUCTO)]
   },
 ];

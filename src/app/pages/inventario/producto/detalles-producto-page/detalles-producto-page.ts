@@ -15,6 +15,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { ConfigService } from '../../../../services/config.service';
 import { ApiService } from '../../../../services/api.service';
 import { CartService } from '../../../../services/cart.service';
+import { AuthService } from '../../../../services/auth.service';
 
 import { Producto, Multimedia } from '../../../../models/inventario/producto.model';
 import { VarianteProducto } from '../../../../models/inventario/variante.model';
@@ -51,7 +52,8 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
   archivoSeleccionado: File | null = null;
   previewUrl: string | null = null;
 
-  displayedColumnsVariante: string[] = ['sku', 'precio', 'cantidad', 'costo_ponderado', 'limite_cantidad', 'acciones'];
+  private readonly columnasVarianteBase: string[] = ['sku', 'precio', 'cantidad', 'acciones'];
+  private readonly columnasVarianteAdmin: string[] = ['costo_ponderado', 'limite_cantidad'];
 
   private productoId: number;
   private destroy$ = new Subject<void>();
@@ -66,7 +68,8 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
     private configService: ConfigService,
     private snackBar: MatSnackBar,
     private cartService: CartService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private authService: AuthService
 
   ) {
     this.productoId = Number(this.route.snapshot.paramMap.get('id'));
@@ -120,7 +123,24 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
   }
 
   volver(): void {
-    this.router.navigate(['/inventario/productos']);
+    this.router.navigate([this.isCliente ? '/extra/catalogo' : '/inventario/productos']);
+  }
+
+  get isCliente(): boolean {
+    if (this.authService.isSuperuser()) {
+      return false;
+    }
+
+    const roles = this.authService.getRoles();
+    return roles.length === 1 && roles[0]?.toLowerCase() === 'cliente';
+  }
+
+  get displayedColumnsVariante(): string[] {
+    if (this.isCliente) {
+      return this.columnasVarianteBase;
+    }
+
+    return [...this.columnasVarianteBase, ...this.columnasVarianteAdmin];
   }
 
   getImagenPrincipalUrl(): string | null {
@@ -248,7 +268,7 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
     this.dialog.open(DetallesVarianteComponent, {
       width: '500px',
       maxWidth: '90vw',
-      data: { variante }
+      data: { variante, ocultarCostos: this.isCliente }
     });
   }
 

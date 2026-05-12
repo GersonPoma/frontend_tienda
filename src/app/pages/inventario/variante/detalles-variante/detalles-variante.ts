@@ -20,7 +20,7 @@ import { VarianteProducto } from '../../../../models/inventario/variante.model';
 export class DetallesVarianteComponent {
   constructor(
     public dialogRef: MatDialogRef<DetallesVarianteComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { variante: VarianteProducto }
+    @Inject(MAT_DIALOG_DATA) public data: { variante: VarianteProducto; ocultarCostos?: boolean }
   ) {}
 
   cerrar(): void {

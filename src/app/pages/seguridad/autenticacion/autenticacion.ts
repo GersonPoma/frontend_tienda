@@ -133,7 +133,9 @@ export class Autenticacion implements OnInit, OnDestroy {
           });
           // Pequeño delay para asegurar que se guardaron todos los datos
           setTimeout(() => {
-            this.router.navigate(['/']);
+            const esClienteUnico = this.isClienteOnly(response.roles, response.is_superuser);
+            const destino = esClienteUnico ? '/extra/catalogo' : '/';
+            this.router.navigate([destino]);
           }, 500);
         },
         error: (error) => {
@@ -146,6 +148,18 @@ export class Autenticacion implements OnInit, OnDestroy {
           });
         }
       });
+  }
+
+  private isClienteOnly(roles?: string[], isSuperuser?: boolean): boolean {
+    if (isSuperuser) {
+      return false;
+    }
+
+    if (!roles || roles.length !== 1) {
+      return false;
+    }
+
+    return roles[0]?.toLowerCase() === 'cliente';
   }
 
   private handleRegister(): void {

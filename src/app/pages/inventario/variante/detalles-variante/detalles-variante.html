@@ -15,7 +15,7 @@
         <strong>Precio:</strong>
         <p style="margin: 4px 0 0 0; font-size: 16px;">{{ data.variante.precio | currency:'USD' }}</p>
       </div>
-      <div style="flex: 1; min-width: 150px;">
+      <div *ngIf="!data.ocultarCostos" style="flex: 1; min-width: 150px;">
         <strong>Costo Ponderado:</strong>
         <p style="margin: 4px 0 0 0; font-size: 16px;">{{ data.variante.costo_ponderado | currency:'USD' }}</p>
       </div>
@@ -26,7 +26,7 @@
         <strong>Cantidad:</strong>
         <p style="margin: 4px 0 0 0; font-size: 16px;">{{ data.variante.cantidad }}</p>
       </div>
-      <div style="flex: 1; min-width: 150px;">
+      <div *ngIf="!data.ocultarCostos" style="flex: 1; min-width: 150px;">
         <strong>Límite de Cantidad:</strong>
         <p style="margin: 4px 0 0 0; font-size: 16px;">{{ data.variante.limite_cantidad }}</p>
       </div>
