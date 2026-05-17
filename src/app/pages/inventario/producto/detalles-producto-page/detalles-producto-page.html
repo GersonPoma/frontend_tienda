@@ -21,14 +21,23 @@
           <!-- Imagen Principal -->
           <div style="flex: 0 0 250px;">
             <div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 8px; text-align: center; min-height: 250px; display: flex; align-items: center; justify-content: center; background: #f5f5f5;">
-              <img *ngIf="getImagenPrincipalUrl()"
-                   [src]="getImagenPrincipalUrl()"
+              <img *ngIf="getImagenSeleccionadaUrl()"
+                   [src]="getImagenSeleccionadaUrl()"
                    [alt]="producto.nombre"
-                   style="max-width: 100%; max-height: 234px; object-fit: contain; border-radius: 4px;">
-              <mat-icon *ngIf="!getImagenPrincipalUrl()"
+                   (click)="abrirLightbox(imagenSeleccionadaIndex)"
+                   style="max-width: 100%; max-height: 234px; object-fit: contain; border-radius: 4px; cursor: zoom-in;">
+              <mat-icon *ngIf="!getImagenSeleccionadaUrl()"
                        style="font-size: 64px; width: 64px; height: 64px; color: #ccc;">
                 image
               </mat-icon>
+            </div>
+            <div *ngIf="producto.imagenes && producto.imagenes.length > 1" style="display: flex; justify-content: center; gap: 8px; margin-top: 8px;">
+              <button mat-icon-button (click)="anteriorImagen()" aria-label="Imagen anterior">
+                <mat-icon>chevron_left</mat-icon>
+              </button>
+              <button mat-icon-button (click)="siguienteImagen()" aria-label="Imagen siguiente">
+                <mat-icon>chevron_right</mat-icon>
+              </button>
             </div>
           </div>
 
@@ -58,13 +67,28 @@
             </div>
 
             <!-- Sección de Imágenes -->
-            <div style="margin-top: 24px;" *ngIf="!isCliente">
-              <strong>Imágenes del producto:</strong>
+            <div style="margin-top: 24px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                <strong>Imágenes del producto:</strong>
+                <button *ngIf="modelo3dDisponible" mat-stroked-button color="primary" (click)="abrirModelo3d()">
+                  <mat-icon style="margin-right: 6px;">view_in_ar</mat-icon>
+                  Ver 3D
+                </button>
+              </div>
 
-              <div style="margin-top: 12px; padding: 16px; border: 2px dashed #ccc; border-radius: 8px; text-align: center;">
+              <div *ngIf="!isCliente" style="margin-top: 12px; padding: 16px; border: 2px dashed #ccc; border-radius: 8px; text-align: center;">
+                <div style="display: flex; flex-direction: column; gap: 8px; align-items: center; margin-bottom: 12px;">
+                  <label style="font-weight: 600;">Tipo de multimedio</label>
+                  <select [(ngModel)]="tipoMultimedia"
+                          style="min-width: 220px; padding: 8px 12px; border-radius: 6px; border: 1px solid #cfd3d7;">
+                    <option value="imagen">Imagen</option>
+                    <option value="video">Video</option>
+                    <option value="realidad_aumentada">Realidad Aumentada</option>
+                  </select>
+                </div>
                 <input type="file"
                        id="fileInput"
-                       accept="image/*"
+                    [attr.accept]="tipoMultimedia === 'video' ? 'video/*' : (tipoMultimedia === 'imagen' ? 'image/*' : (tipoMultimedia === 'realidad_aumentada' ? '.glb,.gltf' : null))"
                        (change)="onFileSelected($event)"
                        style="display: none;">
 
@@ -74,14 +98,25 @@
                     Seleccionar imagen
                   </label>
                   <p style="margin: 8px 0 0 0; color: #666; font-size: 14px;">
-                    JPEG, PNG, WebP (máx 5MB)
+                    {{ tipoMultimedia === 'video' ? 'MP4, WebM (máx 50MB)' : (tipoMultimedia === 'realidad_aumentada' ? 'Archivo AR (máx 50MB)' : 'JPEG, PNG, WebP (máx 5MB)') }}
                   </p>
                 </div>
 
                 <div *ngIf="previewUrl" style="position: relative; display: inline-block;">
-                  <img [src]="previewUrl"
+                  <img *ngIf="tipoMultimedia === 'imagen'"
+                       [src]="previewUrl"
                        alt="Preview"
                        style="max-width: 150px; max-height: 150px; object-fit: contain; border-radius: 4px;">
+                  <video *ngIf="tipoMultimedia === 'video'"
+                         [src]="previewUrl"
+                         style="max-width: 150px; max-height: 150px; border-radius: 4px;"
+                         controls>
+                  </video>
+                  <model-viewer *ngIf="tipoMultimedia === 'realidad_aumentada'"
+                                [attr.src]="previewUrl"
+                                camera-controls
+                                style="width: 180px; height: 150px; background: #f3f4f6; border-radius: 4px;">
+                  </model-viewer>
                   <button mat-icon-button
                           (click)="cancelarSeleccion()"
                           style="position: absolute; top: -8px; right: -8px; background: white;">
@@ -109,29 +144,34 @@
               <!-- Galería de imágenes -->
               <div *ngIf="producto.imagenes && producto.imagenes.length > 0" style="margin-top: 16px;">
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                  <div *ngFor="let img of producto.imagenes"
-                       style="position: relative; border: 2px solid; border-color: {{ img.es_principal ? '#1976d2' : '#e0e0e0' }}; border-radius: 4px; padding: 4px; background: white;">
+                     <div *ngFor="let img of producto.imagenes; let i = index"
+                       [style.border-color]="!isCliente && img.es_principal ? '#1976d2' : '#e0e0e0'"
+                       [style.box-shadow]="i === imagenSeleccionadaIndex ? '0 0 0 2px #1976d2' : 'none'"
+                       (click)="abrirLightbox(i)"
+                       style="position: relative; border: 2px solid; border-radius: 4px; padding: 6px; background: white; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer;">
                     <img [src]="img.archivo_url"
-                         alt="Imagen"
-                         style="width: 80px; height: 80px; object-fit: cover; border-radius: 2px;">
-                    <mat-icon *ngIf="img.es_principal"
+                      alt="Imagen"
+                      style="width: 80px; height: 80px; object-fit: cover; border-radius: 2px; display: block;">
+                    <mat-icon *ngIf="img.es_principal && !isCliente"
                             style="position: absolute; top: -8px; right: -8px; font-size: 18px; width: 18px; height: 18px; background: #4caf50; color: white; border-radius: 50%; padding: 2px;">
                       check
                     </mat-icon>
-                    <div *ngIf="!isCliente" style="display: flex; gap: 4px; margin-top: 4px; justify-content: center;">
+                    <div *ngIf="!isCliente" style="display: flex; gap: 8px; justify-content: center; width: 100%;">
                       <button mat-icon-button
                               matTooltip="Establecer como principal"
+                              matTooltipPosition="above"
                               (click)="establecerPrincipal(img)"
                               [disabled]="img.es_principal || isSaving"
-                              style="width: 28px; height: 28px;">
+                              style="width: 30px; height: 30px; padding: 0; line-height: 30px; display: inline-flex; align-items: center; justify-content: center;">
                         <mat-icon style="font-size: 18px; width: 18px; height: 18px;">star</mat-icon>
                       </button>
                       <button mat-icon-button
                               matTooltip="Eliminar imagen"
+                              matTooltipPosition="above"
                               (click)="eliminarImagen(img)"
                               [disabled]="isSaving"
                               color="warn"
-                              style="width: 28px; height: 28px;">
+                              style="width: 30px; height: 30px; padding: 0; line-height: 30px; display: inline-flex; align-items: center; justify-content: center;">
                         <mat-icon style="font-size: 18px; width: 18px; height: 18px;">delete</mat-icon>
                       </button>
                     </div>
@@ -154,7 +194,7 @@
       <mat-card-header>
         <div class="page-header">
           <mat-card-title>Variantes del Producto</mat-card-title>
-          <button *ngIf="!isCliente" mat-raised-button color="primary" (click)="crearVariante()">
+          <button *ngIf="permisosService.puedeCrearVariante()" mat-raised-button color="primary" (click)="crearVariante()">
             <mat-icon class="m-r-8">add</mat-icon>
             Agregar Variante
           </button>
@@ -166,7 +206,7 @@
           <mat-spinner diameter="40"></mat-spinner>
         </div>
 
-        <div *ngIf="!isLoadingVariantes && variantes.length > 0" class="table-responsive">
+        <div *ngIf="!isLoadingVariantes && permisosService.puedeVerVariante() && variantes.length > 0" class="table-responsive">
           <table mat-table [dataSource]="variantes" class="w-full">
             <ng-container matColumnDef="sku">
               <th mat-header-cell *matHeaderCellDef>SKU</th>
@@ -202,10 +242,10 @@
                 <button mat-icon-button matTooltip="Ver" (click)="verVariante(element)" color="accent">
                   <mat-icon>visibility</mat-icon>
                 </button>
-                <button *ngIf="!isCliente" mat-icon-button matTooltip="Editar" (click)="editarVariante(element)" color="primary">
+                <button *ngIf="permisosService.puedeEditarVariante()" mat-icon-button matTooltip="Editar" (click)="editarVariante(element)" color="primary">
                   <mat-icon>edit</mat-icon>
                 </button>
-                <button *ngIf="!isCliente" mat-icon-button matTooltip="Eliminar" (click)="eliminarVariante(element)" color="warn">
+                <button *ngIf="permisosService.puedeEliminarVariante()" mat-icon-button matTooltip="Eliminar" (click)="eliminarVariante(element)" color="warn">
                   <mat-icon>delete</mat-icon>
                 </button>
               </td>
@@ -216,7 +256,7 @@
           </table>
         </div>
 
-        <div *ngIf="!isLoadingVariantes && variantes.length === 0" class="empty-state">
+        <div *ngIf="!isLoadingVariantes && permisosService.puedeVerVariante() && variantes.length === 0" class="empty-state">
           <mat-icon class="empty-icon">info</mat-icon>
           <p class="empty-text">Este producto no tiene variantes</p>
         </div>

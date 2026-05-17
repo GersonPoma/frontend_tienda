@@ -1,5 +1,6 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,12 +11,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, forkJoin } from 'rxjs';
 
 import { ConfigService } from '../../../../services/config.service';
 import { ApiService } from '../../../../services/api.service';
 import { CartService } from '../../../../services/cart.service';
 import { AuthService } from '../../../../services/auth.service';
+import { PermisosService } from '../../../../services/permisos.service';
 
 import { Producto, Multimedia } from '../../../../models/inventario/producto.model';
 import { VarianteProducto } from '../../../../models/inventario/variante.model';
@@ -23,12 +25,14 @@ import { Pagination } from '../../../../models/pagination.model';
 import { CrearVarianteComponent } from '../../variante/crear-variante/crear-variante';
 import { DetallesVarianteComponent } from '../../variante/detalles-variante/detalles-variante';
 import { EliminarVarianteComponent } from '../../variante/eliminar-variante/eliminar-variante';
+import { ImagenLightboxComponent } from './imagen-lightbox/imagen-lightbox.component';
 
 @Component({
   selector: 'app-detalles-producto-page',
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     RouterModule,
     MatButtonModule,
     MatCardModule,
@@ -39,6 +43,7 @@ import { EliminarVarianteComponent } from '../../variante/eliminar-variante/elim
     MatTableModule,
     MatTooltipModule
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './detalles-producto-page.html',
   styleUrl: './detalles-producto-page.scss'
 })
@@ -51,9 +56,14 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
 
   archivoSeleccionado: File | null = null;
   previewUrl: string | null = null;
+  previewFileName: string | null = null;
+  previewIsAr = false;
+  imagenSeleccionadaIndex = -1;
+  tipoMultimedia: 'imagen' | 'video' | 'realidad_aumentada' = 'imagen';
 
-  private readonly columnasVarianteBase: string[] = ['sku', 'precio', 'cantidad', 'acciones'];
+  private readonly columnasVarianteBase: string[] = ['sku', 'precio', 'cantidad'];
   private readonly columnasVarianteAdmin: string[] = ['costo_ponderado', 'limite_cantidad'];
+  private readonly columnasVarianteAcciones: string[] = ['acciones'];
 
   private productoId: number;
   private destroy$ = new Subject<void>();
@@ -69,7 +79,8 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
     private snackBar: MatSnackBar,
     private cartService: CartService,
     private dialog: MatDialog,
-    private authService: AuthService
+    private authService: AuthService,
+    public permisosService: PermisosService
 
   ) {
     this.productoId = Number(this.route.snapshot.paramMap.get('id'));
@@ -89,13 +100,14 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
 
   private cargarProducto(): void {
     this.isLoading = true;
-    const url = this.configService.getApiUrl('productos');
+    const url = this.configService.getApiUrl('productos-detalle');
 
     this.apiService.getById<Producto>(url, this.productoId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (producto) => {
           this.producto = producto;
+          this.establecerImagenSeleccionada();
           this.isLoading = false;
         },
         error: () => {
@@ -108,6 +120,11 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
 
   private cargarVariantes(): void {
     this.isLoadingVariantes = true;
+
+    if (!this.permisosService.puedeVerVariante()) {
+      this.isLoadingVariantes = false;
+      return;
+    }
 
     this.apiService.getWithPagination<VarianteProducto>(this.variantesUrl, 1, 100, { producto_id: this.productoId })
       .pipe(takeUntil(this.destroy$))
@@ -137,10 +154,10 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
 
   get displayedColumnsVariante(): string[] {
     if (this.isCliente) {
-      return this.columnasVarianteBase;
+      return [...this.columnasVarianteBase, ...this.columnasVarianteAcciones];
     }
 
-    return [...this.columnasVarianteBase, ...this.columnasVarianteAdmin];
+    return [...this.columnasVarianteBase, ...this.columnasVarianteAdmin, ...this.columnasVarianteAcciones];
   }
 
   getImagenPrincipalUrl(): string | null {
@@ -149,17 +166,117 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
     return principal ? principal.archivo_url : this.producto.imagenes[0].archivo_url;
   }
 
+  getImagenSeleccionadaUrl(): string | null {
+    if (!this.producto?.imagenes?.length || this.imagenSeleccionadaIndex < 0) return null;
+    return this.producto.imagenes[this.imagenSeleccionadaIndex]?.archivo_url || null;
+  }
+
+  get modelo3dDisponible(): Multimedia | null {
+    if (!this.producto?.modelos_3d?.length) return null;
+    return this.producto.modelos_3d[0] || null;
+  }
+
+  seleccionarImagen(index: number): void {
+    if (!this.producto?.imagenes?.length) return;
+    if (index < 0 || index >= this.producto.imagenes.length) return;
+    this.imagenSeleccionadaIndex = index;
+  }
+
+  abrirLightbox(index: number): void {
+    if (!this.producto?.imagenes?.length) return;
+    const total = this.producto.imagenes.length;
+    const safeIndex = Math.max(0, Math.min(index, total - 1));
+    this.seleccionarImagen(safeIndex);
+
+    this.dialog.open(ImagenLightboxComponent, {
+      width: '90vw',
+      height: '80vh',
+      maxWidth: '900px',
+      autoFocus: false,
+      data: {
+        images: this.producto.imagenes,
+        startIndex: safeIndex,
+        title: this.producto.nombre
+      }
+    });
+  }
+
+  abrirModelo3d(): void {
+    if (!this.modelo3dDisponible) return;
+    const posterUrl = this.producto?.imagen_principal || this.producto?.imagenes?.[0]?.archivo_url || null;
+    this.dialog.open(ImagenLightboxComponent, {
+      width: '90vw',
+      height: '80vh',
+      maxWidth: '900px',
+      autoFocus: false,
+      data: {
+        images: [],
+        startIndex: 0,
+        title: 'Modelo 3D',
+        modelUrl: this.modelo3dDisponible.archivo_url,
+        posterUrl
+      }
+    });
+  }
+
+  siguienteImagen(): void {
+    if (!this.producto?.imagenes?.length) return;
+    this.imagenSeleccionadaIndex = (this.imagenSeleccionadaIndex + 1) % this.producto.imagenes.length;
+  }
+
+  anteriorImagen(): void {
+    if (!this.producto?.imagenes?.length) return;
+    const total = this.producto.imagenes.length;
+    this.imagenSeleccionadaIndex = (this.imagenSeleccionadaIndex - 1 + total) % total;
+  }
+
+  private establecerImagenSeleccionada(): void {
+    if (!this.producto?.imagenes?.length) {
+      this.imagenSeleccionadaIndex = -1;
+      return;
+    }
+
+    const principalIndex = this.producto.imagenes.findIndex(i => i.es_principal);
+    this.imagenSeleccionadaIndex = principalIndex >= 0 ? principalIndex : 0;
+  }
+
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
-      if (!file.type.startsWith('image/')) {
-        this.snackBar.open('Selecciona una imagen (JPEG, PNG, WebP)', 'Cerrar', { duration: 3000 });
+      if (!this.esTipoArchivoValido(file)) {
+        const mensaje = this.tipoMultimedia === 'video'
+          ? 'Selecciona un video valido'
+          : this.tipoMultimedia === 'realidad_aumentada'
+            ? 'Selecciona un archivo valido'
+            : 'Selecciona una imagen (JPEG, PNG, WebP)';
+        this.snackBar.open(mensaje, 'Cerrar', { duration: 3000 });
         return;
       }
       this.archivoSeleccionado = file;
-      this.previewUrl = URL.createObjectURL(file);
+      this.previewFileName = file.name;
+      this.previewIsAr = this.tipoMultimedia === 'realidad_aumentada' && this.esArchivoAr(file);
+      if (this.tipoMultimedia === 'imagen' || this.tipoMultimedia === 'video' || this.previewIsAr) {
+        this.previewUrl = URL.createObjectURL(file);
+      } else {
+        this.previewUrl = null;
+      }
     }
+  }
+
+  private esTipoArchivoValido(file: File): boolean {
+    if (this.tipoMultimedia === 'video') {
+      return file.type.startsWith('video/');
+    }
+    if (this.tipoMultimedia === 'realidad_aumentada') {
+      return this.esArchivoAr(file);
+    }
+    return file.type.startsWith('image/');
+  }
+
+  private esArchivoAr(file: File): boolean {
+    const name = file.name.toLowerCase();
+    return name.endsWith('.glb') || name.endsWith('.gltf');
   }
 
   agregarImagen(): void {
@@ -169,7 +286,7 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
     const formData = new FormData();
     formData.append('archivo', this.archivoSeleccionado);
     formData.append('producto_id', String(this.producto.id));
-    formData.append('tipo', 'imagen');
+    formData.append('tipo', this.tipoMultimedia);
 
     const orden = this.producto.imagenes ? this.producto.imagenes.length : 0;
     formData.append('es_principal', String(orden === 0));
@@ -213,30 +330,26 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
     if (imagen.es_principal || !this.producto) return;
 
     this.isSaving = true;
-    const updates = (this.producto.imagenes || []).map(img => {
-      const isTarget = img.id === imagen.id;
-      if (img.es_principal !== isTarget) {
-        return this.http.patch(`${this.multimediaUrl}${img.id}/`, { es_principal: isTarget });
-      }
-      return null;
-    });
+    const updates = (this.producto.imagenes || [])
+      .filter(img => img.es_principal !== (img.id === imagen.id))
+      .map(img => this.http.patch(`${this.multimediaUrl}${img.id}/`, { es_principal: img.id === imagen.id }));
 
-    const firstUpdate = updates.find(u => u !== null);
-    if (firstUpdate) {
-      firstUpdate.pipe(takeUntil(this.destroy$)).subscribe({
-        next: () => {
-          this.isSaving = false;
-          this.snackBar.open('Imagen principal actualizada', 'OK', { duration: 3000 });
-          this.cargarProducto();
-        },
-        error: () => {
-          this.isSaving = false;
-          this.snackBar.open('Error al actualizar', 'Cerrar', { duration: 3000 });
-        }
-      });
-    } else {
+    if (updates.length === 0) {
       this.isSaving = false;
+      return;
     }
+
+    forkJoin(updates).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.isSaving = false;
+        this.snackBar.open('Imagen principal actualizada', 'OK', { duration: 3000 });
+        this.cargarProducto();
+      },
+      error: () => {
+        this.isSaving = false;
+        this.snackBar.open('Error al actualizar', 'Cerrar', { duration: 3000 });
+      }
+    });
   }
 
   cancelarSeleccion(): void {
@@ -245,6 +358,8 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
       URL.revokeObjectURL(this.previewUrl);
       this.previewUrl = null;
     }
+    this.previewFileName = null;
+    this.previewIsAr = false;
   }
 
   crearVariante(): void {

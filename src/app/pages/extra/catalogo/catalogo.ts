@@ -94,7 +94,7 @@ export class CatalogoComponent implements OnInit {
 
   cargarProductos(): void {
     this.cargando = true;
-    const url = this.configService.getApiUrl('productos');
+    const url = this.configService.getApiUrl('catalogo');
     const params: any = { page_size: 20 };
     
     if (this.categoriaSeleccionada) {

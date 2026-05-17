@@ -16,6 +16,8 @@ export interface Producto {
   marca: number;
   marca_nombre: string;
   imagenes: Multimedia[];
+  modelos_3d?: Multimedia[];
+  imagen_principal?: string;
 }
 
 export interface CrearProducto {

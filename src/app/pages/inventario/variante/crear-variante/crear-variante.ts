@@ -11,6 +11,7 @@ import { Subject, takeUntil } from 'rxjs';
 
 import { ApiService } from '../../../../services/api.service';
 import { ConfigService } from '../../../../services/config.service';
+import { AuthService } from '../../../../services/auth.service';
 
 @Component({
   selector: 'app-crear-variante',
@@ -32,6 +33,7 @@ export class CrearVarianteComponent implements OnInit, OnDestroy {
   form: FormGroup;
   isSaving = false;
   isEditMode = false;
+  private isClienteRole = false;
 
   private destroy$ = new Subject<void>();
 
@@ -40,10 +42,12 @@ export class CrearVarianteComponent implements OnInit, OnDestroy {
     private apiService: ApiService,
     private configService: ConfigService,
     private snackBar: MatSnackBar,
+    private authService: AuthService,
     public dialogRef: MatDialogRef<CrearVarianteComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.isEditMode = !!data?.variante;
+    this.isClienteRole = this.calcularEsCliente();
 
     this.form = this.formBuilder.group({
       sku: [data?.variante?.sku || '', [Validators.required, Validators.maxLength(100)]],
@@ -52,6 +56,10 @@ export class CrearVarianteComponent implements OnInit, OnDestroy {
       costo_ponderado: [data?.variante?.costo_ponderado || '', [Validators.required, Validators.min(0)]],
       limite_cantidad: [data?.variante?.limite_cantidad || 0, [Validators.required, Validators.min(0)]]
     });
+
+    if (this.isClienteRole) {
+      this.removerValidacionesCostos();
+    }
   }
 
   ngOnInit(): void {}
@@ -59,6 +67,40 @@ export class CrearVarianteComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  get isCliente(): boolean {
+    return this.isClienteRole;
+  }
+
+  private calcularEsCliente(): boolean {
+    if (this.authService.isSuperuser()) {
+      return false;
+    }
+
+    const roles = this.authService.getRoles();
+    return roles.length === 1 && roles[0]?.toLowerCase() === 'cliente';
+  }
+
+  private removerValidacionesCostos(): void {
+    const costoControl = this.form.get('costo_ponderado');
+    const limiteControl = this.form.get('limite_cantidad');
+
+    if (costoControl) {
+      costoControl.clearValidators();
+      if (costoControl.value === null || costoControl.value === '') {
+        costoControl.setValue(0);
+      }
+      costoControl.updateValueAndValidity();
+    }
+
+    if (limiteControl) {
+      limiteControl.clearValidators();
+      if (limiteControl.value === null || limiteControl.value === '') {
+        limiteControl.setValue(0);
+      }
+      limiteControl.updateValueAndValidity();
+    }
   }
 
   guardar(): void {

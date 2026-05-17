@@ -1,0 +1,43 @@
+<div class="lightbox">
+  <div class="lightbox-header">
+    <div class="lightbox-title">{{ data.title || 'Imagen' }}</div>
+    <button mat-icon-button (click)="cerrar()" aria-label="Cerrar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="lightbox-body" [class.model-view]="isModelView">
+    <button *ngIf="!isModelView" mat-icon-button class="nav-button" (click)="anterior()" aria-label="Anterior">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+
+    <div class="image-frame">
+      <model-viewer *ngIf="isModelView"
+                    [attr.src]="data.modelUrl"
+                    [attr.poster]="data.posterUrl || null"
+                    camera-controls
+                    loading="lazy"
+                    (load)="onModelLoad()"
+                    (error)="onModelError($event)"
+                    style="width: 100%; height: 100%; display: block;">
+      </model-viewer>
+      <div *ngIf="isModelView && modelError" class="empty">
+        <mat-icon>error</mat-icon>
+        <span>{{ modelError }}</span>
+      </div>
+      <img *ngIf="!isModelView && imagenActualUrl" [src]="imagenActualUrl" alt="Imagen" />
+      <div *ngIf="!isModelView && !imagenActualUrl" class="empty">
+        <mat-icon>image</mat-icon>
+        <span>Sin imagen</span>
+      </div>
+    </div>
+
+    <button *ngIf="!isModelView" mat-icon-button class="nav-button" (click)="siguiente()" aria-label="Siguiente">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+
+  <div class="lightbox-footer" *ngIf="!isModelView && total > 1">
+    {{ index + 1 }} / {{ total }}
+  </div>
+</div>
