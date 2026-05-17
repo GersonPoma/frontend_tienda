@@ -203,7 +203,6 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
 
   abrirModelo3d(): void {
     if (!this.modelo3dDisponible) return;
-    const posterUrl = this.producto?.imagen_principal || this.producto?.imagenes?.[0]?.archivo_url || null;
     this.dialog.open(ImagenLightboxComponent, {
       width: '90vw',
       height: '80vh',
@@ -213,8 +212,7 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
         images: [],
         startIndex: 0,
         title: 'Modelo 3D',
-        modelUrl: this.modelo3dDisponible.archivo_url,
-        posterUrl
+        modelUrl: this.modelo3dDisponible.archivo_url
       }
     });
   }

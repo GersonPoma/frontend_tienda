@@ -50,6 +50,7 @@
   min-height: 420px;
   box-shadow: 0 8px 20px rgba(31, 36, 48, 0.12);
   width: 100%;
+  position: relative;
 }
 
 .image-frame img {
@@ -81,4 +82,58 @@
   margin-top: 8px;
   color: #697182;
   font-size: 13px;
+}
+
+/* Barra de progreso del modelo 3D */
+.progress-bar {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(420px, 70%);
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #e6e9ef, #f3f5f9);
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(31, 36, 48, 0.15);
+  border: 1px solid rgba(31, 36, 48, 0.08);
+}
+
+.progress-bar .update-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #1976d2, #42a5f5, #64b5f6);
+  transition: width 0.2s ease;
+  box-shadow: 0 0 12px rgba(25, 118, 210, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar .update-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.35) 45%, transparent 90%);
+  transform: translateX(-100%);
+  animation: shimmer 1.4s infinite;
+}
+
+.progress-bar .progress-text {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: #5b6472;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }

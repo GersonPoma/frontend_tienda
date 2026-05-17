@@ -13,14 +13,19 @@
 
     <div class="image-frame">
       <model-viewer *ngIf="isModelView"
-                    [attr.src]="data.modelUrl"
-                    [attr.poster]="data.posterUrl || null"
-                    camera-controls
-                    loading="lazy"
-                    (load)="onModelLoad()"
-                    (error)="onModelError($event)"
-                    style="width: 100%; height: 100%; display: block;">
+              [attr.src]="data.modelUrl"
+              camera-controls
+              loading="eager" 
+              reveal="auto"
+              (progress)="onModelProgress($event)"
+              (load)="onModelLoad()"
+              (error)="onModelError($event)"
+              style="width: 100%; height: 100%; display: block;">
       </model-viewer>
+      <div *ngIf="isModelView && isModelLoading" class="progress-bar">
+        <div class="update-bar" [style.width.%]="modelProgress"></div>
+        <span class="progress-text">{{ modelProgress }}%</span>
+      </div>
       <div *ngIf="isModelView && modelError" class="empty">
         <mat-icon>error</mat-icon>
         <span>{{ modelError }}</span>

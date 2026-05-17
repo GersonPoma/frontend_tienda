@@ -25,6 +25,8 @@ interface LightboxData {
 export class ImagenLightboxComponent {
   index = 0;
   modelError: string | null = null;
+  modelProgress = 0;
+  isModelLoading = false;
 
   constructor(
     public dialogRef: MatDialogRef<ImagenLightboxComponent>,
@@ -63,12 +65,24 @@ export class ImagenLightboxComponent {
 
   onModelLoad(): void {
     this.modelError = null;
+    this.isModelLoading = false;
+    this.modelProgress = 100;
     console.log('Model-viewer loaded:', this.data.modelUrl);
   }
 
   onModelError(event: Event): void {
     const detail = (event as CustomEvent)?.detail;
     this.modelError = detail?.message || 'Error al cargar el modelo 3D';
+    this.isModelLoading = false;
     console.error('Model-viewer error:', detail || event);
+  }
+
+  onModelProgress(event: Event): void {
+    const detail = (event as CustomEvent)?.detail;
+    const progress = typeof detail?.totalProgress === 'number'
+      ? Math.round(detail.totalProgress * 100)
+      : 0;
+    this.modelProgress = progress;
+    this.isModelLoading = progress < 100;
   }
 }
