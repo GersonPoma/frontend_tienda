@@ -34,6 +34,10 @@
       <mat-icon>settings</mat-icon>
       <span>Configuración</span>
     </button>
+    <button mat-menu-item *ngIf="!esCliente()" (click)="abrirConfigAtajos()">
+      <mat-icon>keyboard</mat-icon>
+      <span>Atajos de Teclado</span>
+    </button>
     <mat-divider></mat-divider>
     <button mat-menu-item (click)="cerrarSesion()" class="logout-button">
       <mat-icon>logout</mat-icon>

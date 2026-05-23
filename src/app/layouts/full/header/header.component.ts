@@ -6,6 +6,7 @@ import {
   ViewEncapsulation,
   OnInit,
   OnDestroy,
+  inject,
 } from '@angular/core';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { MaterialModule } from 'src/app/material.module';
@@ -17,8 +18,10 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from 'src/app/services/auth.service';
 import { CartService } from 'src/app/services/cart.service';
+import { ConfigurarAtajosComponent } from 'src/app/components/configurar-atajos/configurar-atajos.component';
 
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -52,7 +55,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     public cartService: CartService,
-    private router: Router
+    private router: Router,
+    private dialog: MatDialog,
   ) {}
 
 
@@ -85,6 +89,18 @@ export class HeaderComponent implements OnInit, OnDestroy {
   /**
    * Cerrar sesión y redirigir al login
    */
+  esCliente(): boolean {
+    const roles = this.authService.getRoles();
+    return !this.authService.isSuperuser() && roles.length === 1 && roles[0]?.toLowerCase() === 'cliente';
+  }
+
+  abrirConfigAtajos(): void {
+    this.dialog.open(ConfigurarAtajosComponent, {
+      width: '650px',
+      disableClose: false,
+    });
+  }
+
   cerrarSesion(): void {
     this.authService.logout()
       .pipe(takeUntil(this.destroy$))
