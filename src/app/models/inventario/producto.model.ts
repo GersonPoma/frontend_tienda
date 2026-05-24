@@ -18,6 +18,7 @@ export interface Producto {
   imagenes: Multimedia[];
   modelos_3d?: Multimedia[];
   imagen_principal?: string;
+  precio_minimo?: number;
 }
 
 export interface CrearProducto {
