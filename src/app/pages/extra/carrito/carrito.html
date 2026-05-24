@@ -76,3 +76,31 @@
     </div>
   </mat-card-content>
 </mat-card>
+
+<mat-card *ngIf="productosRecomendados.length > 0" class="cardWithShadow theme-card m-t-24">
+  <mat-card-header>
+    <mat-card-title>Productos Recomendados</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="recomendados-scroll">
+      <div *ngFor="let rec of productosRecomendados" class="recomendado-card">
+        <a [routerLink]="['/inventario/productos', rec.id]" class="recomendado-link">
+          <div class="recomendado-img">
+            <img *ngIf="rec.imagen_principal" [src]="rec.imagen_principal" [alt]="rec.nombre">
+            <mat-icon *ngIf="!rec.imagen_principal">image</mat-icon>
+          </div>
+          <div class="recomendado-nombre">{{ rec.nombre }}</div>
+          <div class="recomendado-precio">Desde {{ rec.precio_minimo | currency:'BOB' }}</div>
+        </a>
+        <div class="variantes-grid" *ngIf="variantesRecomendados[rec.id]?.length">
+          <button *ngFor="let v of variantesRecomendados[rec.id]"
+                  class="variante-btn"
+                  (click)="$event.stopPropagation(); agregarRecomendado(rec.id, v.id)">
+            <span>{{ v.precio | currency:'BOB' }}</span>
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

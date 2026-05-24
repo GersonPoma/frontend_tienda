@@ -50,8 +50,10 @@ import { ImagenLightboxComponent } from './imagen-lightbox/imagen-lightbox.compo
 export class DetallesProductoPageComponent implements OnInit, OnDestroy {
   producto: Producto | null = null;
   variantes: VarianteProducto[] = [];
+  productosRecomendados: Producto[] = [];
   isLoading = true;
   isLoadingVariantes = false;
+  isLoadingRecomendados = false;
   isSaving = false;
 
   archivoSeleccionado: File | null = null;
@@ -69,6 +71,7 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private multimediaUrl: string;
   private variantesUrl: string;
+  private productosUrl: string;
 
   constructor(
     private route: ActivatedRoute,
@@ -83,14 +86,38 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
     public permisosService: PermisosService
 
   ) {
-    this.productoId = Number(this.route.snapshot.paramMap.get('id'));
     this.multimediaUrl = this.configService.getApiUrl('multimedios');
     this.variantesUrl = this.configService.getApiUrl('variantes');
+    this.productosUrl = this.configService.getApiUrl('productos');
   }
 
   ngOnInit(): void {
-    this.cargarProducto();
-    this.cargarVariantes();
+    this.route.paramMap
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(params => {
+        this.productoId = Number(params.get('id'));
+        this.producto = null;
+        this.variantes = [];
+        this.productosRecomendados = [];
+        this.imagenSeleccionadaIndex = -1;
+        this.cargarProducto();
+        this.cargarVariantes();
+      });
+  }
+
+  private cargarRecomendados(): void {
+    this.isLoadingRecomendados = true;
+    this.http.get<Producto[]>(`${this.productosUrl}${this.productoId}/recomendados/`)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (productos) => {
+          this.productosRecomendados = productos;
+          this.isLoadingRecomendados = false;
+        },
+        error: () => {
+          this.isLoadingRecomendados = false;
+        }
+      });
   }
 
   ngOnDestroy(): void {
@@ -109,6 +136,7 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
           this.producto = producto;
           this.establecerImagenSeleccionada();
           this.isLoading = false;
+          this.cargarRecomendados();
         },
         error: () => {
           this.isLoading = false;
