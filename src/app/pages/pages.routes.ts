@@ -31,6 +31,11 @@ export const PagesRoutes: Routes = [
       import('./reportes/reportes.routes').then((m) => m.ReportesRoutes),
   },
   {
+    path: 'notificaciones',
+    loadChildren: () =>
+      import('./notificaciones/notificaciones.routes').then((m) => m.NotificacionesRoutes),
+  },
+  {
     path: 'ventas',
     loadChildren: () =>
       import('./venta/venta.routes').then((m) => m.VentaRoutes),

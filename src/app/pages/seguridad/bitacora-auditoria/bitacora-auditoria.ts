@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -14,10 +15,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subject, takeUntil } from 'rxjs';
-import { Pagination } from 'src/app/models/pagination.model';
 import { BitacoraAuditoria } from 'src/app/models/bitacora-auditoria.model'; 
-import { ApiService } from 'src/app/services/api.service';
-import { ConfigService } from 'src/app/services/config.service';
 
 @Component({
   selector: 'app-bitacora-auditoria',
@@ -44,12 +42,15 @@ import { ConfigService } from 'src/app/services/config.service';
 export class BitacoraAuditoriaComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = [
     'fecha',
+    'hora',
     'usuario',
     'accion',
-    'modulo',
-    'descripcion',
-    'ip',
-    'resultado',
+    'entidad',
+    'metodo',
+    'ruta',
+    'estado_http',
+    'ip_cliente',
+    'detalles',
   ];
   dataSource: BitacoraAuditoria[] = [];
 
@@ -61,11 +62,8 @@ export class BitacoraAuditoriaComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
 
   filtrosForm = this.fb.group({
-    search: [''],
     accion: [''],
-    modulo: [''],
-    fecha_inicio: [''],
-    fecha_fin: [''],
+    metodo: [''],
   });
 
   acciones = [
@@ -76,16 +74,16 @@ export class BitacoraAuditoriaComponent implements OnInit, OnDestroy {
     { value: 'LOGOUT', label: 'Cierre de sesion' },
   ];
 
-  private apiUrl: string;
+  metodos = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+
+  private readonly apiUrl = 'http://127.0.0.1:8000/api/bitacora/';
+  private readonly tenant = 'tienda_amiga';
   private destroy$ = new Subject<void>();
 
   constructor(
-    private apiService: ApiService,
-    private configService: ConfigService,
+    private http: HttpClient,
     private snackBar: MatSnackBar
-  ) {
-    this.apiUrl = this.configService.getApiUrl('bitacora');
-  }
+  ) {}
 
   ngOnInit(): void {
     this.loadBitacora();
@@ -99,18 +97,15 @@ export class BitacoraAuditoriaComponent implements OnInit, OnDestroy {
   loadBitacora(): void {
     this.isLoading = true;
 
-    this.apiService.getWithPagination<BitacoraAuditoria>(
-      this.apiUrl,
-      this.currentPage + 1,
-      this.pageSize,
-      this.getFiltros()
-    )
+    this.http.get<unknown>(this.apiUrl, {
+      headers: new HttpHeaders({ 'X-Tenant': this.tenant }),
+      params: this.getParams(),
+    })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          const response = data as unknown;
-          this.dataSource = this.getRegistros(response);
-          this.totalItems = this.getTotalRegistros(response, this.dataSource.length);
+          this.dataSource = this.getRegistros(data);
+          this.totalItems = this.getTotalRegistros(data, this.dataSource.length);
 
           this.isLoading = false;
         },
@@ -129,11 +124,8 @@ export class BitacoraAuditoriaComponent implements OnInit, OnDestroy {
 
   limpiarFiltros(): void {
     this.filtrosForm.reset({
-      search: '',
       accion: '',
-      modulo: '',
-      fecha_inicio: '',
-      fecha_fin: '',
+      metodo: '',
     });
     this.consultar();
   }
@@ -149,6 +141,10 @@ export class BitacoraAuditoriaComponent implements OnInit, OnDestroy {
   }
 
   getUsuario(registro: BitacoraAuditoria): string {
+    if (registro.usuarios_id) {
+      return `Usuario #${registro.usuarios_id}`;
+    }
+
     if (typeof registro.usuario === 'string') {
       return registro.usuario;
     }
@@ -168,62 +164,76 @@ export class BitacoraAuditoriaComponent implements OnInit, OnDestroy {
     return registro.accion || registro.action || registro.metodo || 'Consulta';
   }
 
-  getModulo(registro: BitacoraAuditoria): string {
+  getEntidad(registro: BitacoraAuditoria): string {
     const modulo = registro.modulo || registro.app_label || '';
     const modelo = registro.modelo || registro.model_name || '';
 
+    if (registro.entidad) {
+      return registro.entidad;
+    }
+
     if (modulo && modelo) {
-      return `#${modulo} / ${modelo}`;
+      return `${modulo} / ${modelo}`;
     }
 
     return modulo || modelo || 'General';
   }
 
   getDescripcion(registro: BitacoraAuditoria): string {
-    return registro.descripcion || registro.detalle || registro.mensaje || registro.objeto || registro.object_repr || 'Sin descripcion';
+    return registro.detalles || registro.descripcion || registro.detalle || registro.mensaje || registro.objeto || registro.object_repr || 'Sin descripcion';
   }
 
   getIp(registro: BitacoraAuditoria): string {
-    return registro.ip || registro.ip_address || '-';
+    return registro.ip_cliente || registro.ip || registro.ip_address || '-';
   }
 
   getFecha(registro: BitacoraAuditoria): string | null {
     return registro.fecha || registro.fecha_hora || registro.created_at || registro.timestamp || null;
   }
 
-  getResultado(registro: BitacoraAuditoria): string {
-    if (typeof registro.exitoso === 'boolean') {
-      return registro.exitoso ? 'Exitoso' : 'Fallido';
-    }
-
-    return registro.resultado || 'Registrado';
+  getHora(registro: BitacoraAuditoria): string {
+    return registro.hora || '-';
   }
 
-  getResultadoColor(registro: BitacoraAuditoria): 'primary' | 'warn' | 'accent' {
-    const resultado = this.getResultado(registro).toLowerCase();
+  getEstadoHttp(registro: BitacoraAuditoria): string {
+    if (registro.estado_http === 0 || registro.estado_http) {
+      return String(registro.estado_http);
+    }
 
-    if (resultado.includes('fall') || resultado.includes('error')) {
+    if (typeof registro.exitoso === 'boolean') {
+      return registro.exitoso ? '200' : '500';
+    }
+
+    return registro.resultado || '-';
+  }
+
+  getEstadoHttpColor(registro: BitacoraAuditoria): 'primary' | 'warn' | 'accent' {
+    const estado = Number(this.getEstadoHttp(registro));
+
+    if (estado >= 400) {
       return 'warn';
     }
 
-    if (resultado.includes('registr')) {
+    if (estado >= 300) {
       return 'accent';
     }
 
     return 'primary';
   }
 
-  private getFiltros(): Record<string, string> {
+  private getParams(): HttpParams {
     const raw = this.filtrosForm.getRawValue();
-    const filtros: Record<string, string> = {};
+    let params = new HttpParams()
+      .set('page', String(this.currentPage + 1))
+      .set('page_size', String(this.pageSize));
 
     Object.entries(raw).forEach(([key, value]) => {
       if (value) {
-        filtros[key] = value;
+        params = params.set(key, value);
       }
     });
 
-    return filtros;
+    return params;
   }
 
   private getRegistros(response: unknown): BitacoraAuditoria[] {

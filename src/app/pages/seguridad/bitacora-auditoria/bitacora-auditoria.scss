@@ -6,22 +6,39 @@
 }
 
 .filtros-grid {
-  align-items: start;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #edf0f5;
+  border-radius: 8px;
   display: grid;
-  gap: 16px;
-  grid-template-columns: minmax(220px, 1.4fr) repeat(4, minmax(150px, 1fr)) auto;
-  margin-bottom: 20px;
+  gap: 12px;
+  grid-template-columns: minmax(180px, 240px) minmax(180px, 240px) auto;
+  margin-bottom: 24px;
+  padding: 16px;
+}
+
+.filtros-grid mat-form-field {
+  width: 100%;
 }
 
 .filter-actions {
+  align-items: center;
   display: flex;
   gap: 8px;
-  padding-top: 4px;
+  min-height: 56px;
+  white-space: nowrap;
 }
 
-.descripcion-cell {
+.detalles-cell {
   max-width: 360px;
+  min-width: 220px;
   white-space: normal;
+}
+
+.ruta-cell {
+  max-width: 260px;
+  min-width: 180px;
+  overflow-wrap: anywhere;
 }
 
 .muted {
@@ -32,6 +49,10 @@
 @media (max-width: 1200px) {
   .filtros-grid {
     grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+
+  .filter-actions {
+    grid-column: 1 / -1;
   }
 }
 
@@ -47,5 +68,6 @@
 
   .filter-actions {
     flex-wrap: wrap;
+    min-height: auto;
   }
 }

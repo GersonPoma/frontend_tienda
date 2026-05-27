@@ -89,6 +89,14 @@ export const navItems: NavItem[] = [
     permiso: PermisosService.VENTA_VIEW_VENTA
   },
   {
+    navCap: 'Marketing',
+  },
+  {
+    displayName: 'Notificaciones',
+    iconName: 'solar:bell-bing-line-duotone',
+    route: '/notificaciones',
+  },
+  {
     navCap: 'Reportes',
   },
   {

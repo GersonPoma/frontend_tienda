@@ -1,4 +1,5 @@
 export interface BitacoraAuditoria {
+  id_bitacora?: number | string;
   id?: number | string;
   usuario?: number | string | {
     id?: number | string;
@@ -6,11 +7,18 @@ export interface BitacoraAuditoria {
     nombre_completo?: string;
     email?: string;
   } | null;
+  usuarios_id?: number | string | null;
   username?: string;
   usuario_username?: string;
   accion?: string;
   action?: string;
   metodo?: string;
+  ruta?: string;
+  entidad?: string;
+  detalles?: string;
+  hora?: string;
+  ip_cliente?: string;
+  estado_http?: number | string;
   modulo?: string;
   app_label?: string;
   modelo?: string;
