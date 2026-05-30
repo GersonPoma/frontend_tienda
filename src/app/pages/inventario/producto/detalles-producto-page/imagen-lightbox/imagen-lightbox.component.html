@@ -15,6 +15,9 @@
       <model-viewer *ngIf="isModelView"
               [attr.src]="data.modelUrl"
               camera-controls
+              ar
+              ar-modes="webxr scene-viewer quick-look"
+              shadow-intensity="1"
               loading="eager" 
               reveal="auto"
               (progress)="onModelProgress($event)"

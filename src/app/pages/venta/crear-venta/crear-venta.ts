@@ -14,6 +14,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -21,6 +22,7 @@ import { ApiService } from '../../../services/api.service';
 import { ConfigService } from '../../../services/config.service';
 import { Venta } from '../../../models/venta/venta.model';
 import { Producto } from '../../../models/inventario/producto.model';
+import { ProcesarPagoDialogComponent } from '../detalle-venta/procesar-pago-dialog/procesar-pago-dialog';
 
 interface VarianteDisponible {
   id: number;
@@ -75,6 +77,7 @@ interface UsuarioOption {
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatPaginatorModule,
+    MatDialogModule,
   ],
   templateUrl: './crear-venta.html',
 })
@@ -115,6 +118,7 @@ export class CrearVentaComponent implements OnInit, OnDestroy {
     private configService: ConfigService,
     private snackBar: MatSnackBar,
     private router: Router,
+    private dialog: MatDialog,
   ) {
     this.apiUrlVariantes = this.configService.getApiUrl('variantes');
     this.apiUrlProductos = this.configService.getApiUrl('productos');
@@ -369,6 +373,49 @@ export class CrearVentaComponent implements OnInit, OnDestroy {
           this.isSubmitting = false;
         }
       });
+  }
+
+  pagarYFinalizarVenta(): void {
+    if (!this.carritoValido) return;
+
+    const dialogRef = this.dialog.open(ProcesarPagoDialogComponent, {
+      width: '450px',
+      disableClose: true,
+      data: { total: this.totalCarrito }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.success) {
+        this.isSubmitting = true;
+        
+        const body = {
+          tipo: 'presencial',
+          estado: 'completado', // Completado directamente al pagar
+          precio_total: this.totalCarrito,
+          usuario_id: this.selectedUsuarioObj!.id,
+          detalles: this.cartItems.map(item => ({
+            variante_producto_id: item.variante_producto_id,
+            cantidad: item.cantidad,
+            precio_unitario: item.precio_unitario,
+          })),
+        };
+
+        this.apiService.create<Venta>(this.apiUrlVentas, body)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (venta) => {
+              const metodoFormateado = result.metodo.toUpperCase();
+              this.snackBar.open(`¡Venta #${venta.id} pagada vía ${metodoFormateado} y guardada con éxito!`, 'OK', { duration: 5000 });
+              this.router.navigate(['/ventas', venta.id]);
+            },
+            error: (err) => {
+              const msg = err.error?.detail || err.error?.[0] || 'Error al registrar la venta pagada';
+              this.snackBar.open(msg, 'Cerrar', { duration: 5000 });
+              this.isSubmitting = false;
+            }
+          });
+      }
+    });
   }
 
   ngOnDestroy(): void {

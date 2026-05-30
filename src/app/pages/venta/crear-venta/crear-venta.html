@@ -187,14 +187,25 @@
         <button mat-stroked-button color="default" routerLink="/ventas">
           Cancelar
         </button>
+        
         <button
           mat-raised-button
           color="primary"
           [disabled]="!carritoValido || isSubmitting"
           (click)="finalizarVenta()">
           <mat-icon *ngIf="isSubmitting" class="spinner">sync</mat-icon>
-          <mat-icon *ngIf="!isSubmitting">check_circle</mat-icon>
-          Finalizar Venta
+          <mat-icon *ngIf="!isSubmitting">save</mat-icon>
+          Guardar Pendiente
+        </button>
+
+        <button
+          mat-raised-button
+          color="accent"
+          [disabled]="!carritoValido || isSubmitting"
+          (click)="pagarYFinalizarVenta()">
+          <mat-icon *ngIf="isSubmitting" class="spinner">sync</mat-icon>
+          <mat-icon *ngIf="!isSubmitting">payments</mat-icon>
+          Pagar y Completar
         </button>
       </div>
     </div>

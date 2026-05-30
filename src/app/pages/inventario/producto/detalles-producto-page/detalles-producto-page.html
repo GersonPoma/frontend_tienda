@@ -95,7 +95,7 @@
                 <div *ngIf="!archivoSeleccionado && !previewUrl">
                   <label for="fileInput" style="cursor: pointer; display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: #1976d2; color: white; border-radius: 4px;">
                     <mat-icon>cloud_upload</mat-icon>
-                    Seleccionar imagen
+                    {{ tipoMultimedia === 'realidad_aumentada' ? 'Seleccionar archivo 3D' : (tipoMultimedia === 'video' ? 'Seleccionar video' : 'Seleccionar imagen') }}
                   </label>
                   <p style="margin: 8px 0 0 0; color: #666; font-size: 14px;">
                     {{ tipoMultimedia === 'video' ? 'MP4, WebM (máx 50MB)' : (tipoMultimedia === 'realidad_aumentada' ? 'Archivo AR (máx 50MB)' : 'JPEG, PNG, WebP (máx 5MB)') }}
@@ -115,6 +115,9 @@
                   <model-viewer *ngIf="tipoMultimedia === 'realidad_aumentada'"
                                 [attr.src]="previewUrl"
                                 camera-controls
+                                ar
+                                ar-modes="webxr scene-viewer quick-look"
+                                shadow-intensity="1"
                                 style="width: 180px; height: 150px; background: #f3f4f6; border-radius: 4px;">
                   </model-viewer>
                   <button mat-icon-button
@@ -131,7 +134,7 @@
                           [disabled]="isSaving">
                     <span *ngIf="!isSaving">
                       <mat-icon>cloud_upload</mat-icon>
-                      Subir imagen
+                      {{ tipoMultimedia === 'realidad_aumentada' ? 'Subir archivo 3D' : (tipoMultimedia === 'video' ? 'Subir video' : 'Subir archivo') }}
                     </span>
                     <span *ngIf="isSaving">
                       <mat-spinner diameter="20"></mat-spinner>

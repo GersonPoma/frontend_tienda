@@ -35,4 +35,16 @@ export const PagesRoutes: Routes = [
     loadChildren: () =>
       import('./venta/venta.routes').then((m) => m.VentaRoutes),
   },
+  {
+    path: 'configuracion',
+    loadComponent: () =>
+      import('./empresa/configuracion/configuracion.component').then((m) => m.ConfiguracionComponent),
+    data: {
+      title: 'Configuración de Empresa',
+      urls: [
+        { title: 'Dashboard', url: '/' },
+        { title: 'Configuración' }
+      ]
+    }
+  },
 ];

@@ -1,48 +1,79 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { CoreService } from 'src/app/services/core.service';
 import { ConfigService } from 'src/app/services/config.service';
+import { ConfiguracionEmpresaService } from 'src/app/services/configuracion-empresa.service';
 
 @Component({
   selector: 'app-branding',
+  imports: [CommonModule],
   template: `
-    <div class="branding-container">
-      <span class="tenant-name">{{ tenantName }}</span>
+    <div class="branding-container" [style.justify-content]="logoUrl ? 'flex-start' : 'center'">
+      <img *ngIf="logoUrl" [src]="logoUrl" class="tenant-logo" alt="Logo">
+      <span class="tenant-name" [style.text-align]="logoUrl ? 'left' : 'center'">{{ tenantName }}</span>
     </div>
   `,
   styles: [`
+    :host {
+      display: block;
+      width: 100%;
+      min-width: 0;
+    }
+
     .branding-container {
       display: flex;
       align-items: center;
-      justify-content: center;
-      padding: 16px;
+      gap: 10px;
+      padding: 12px 16px;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       border-radius: 8px;
-      margin: 12px;
+      overflow: hidden;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .tenant-logo {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid white;
+      background: white;
+      flex-shrink: 0;
     }
 
     .tenant-name {
       font-weight: 700;
-      font-size: 18px;
+      font-size: 16px;
       color: white;
-      text-align: center;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
       letter-spacing: 0.5px;
-      white-space: normal;
-      word-wrap: break-word;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      flex: 1;
     }
   `]
 })
 export class BrandingComponent implements OnInit {
   options = this.settings.getOptions();
   tenantName: string = '';
+  logoUrl: string | null = null;
 
   constructor(
     private settings: CoreService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private configuracionEmpresaService: ConfiguracionEmpresaService
   ) {}
 
   ngOnInit(): void {
-    this.tenantName = this.formatTenantName();
+    this.configuracionEmpresaService.config$.subscribe(config => {
+      if (config && config.nombre) {
+        this.tenantName = config.nombre;
+      } else {
+        this.tenantName = this.formatTenantName();
+      }
+      this.logoUrl = config ? config.logoUrl : null;
+    });
   }
 
   /**
