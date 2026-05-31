@@ -19,38 +19,8 @@ import { NLPRespuesta } from '../../../models/reportes/reporte-respuesta.model';
     CommonModule, FormsModule, MatFormFieldModule, MatInputModule,
     MatButtonModule, MatIconModule, MatProgressSpinnerModule,
   ],
-  template: `
-    <div class="nlp-container">
-      <p class="nlp-hint">Escribe en lenguaje natural qué reporte deseas ver.</p>
-      <div class="nlp-input-row">
-        <mat-form-field appearance="outline" class="nlp-input">
-          <mat-label>Ej: los 10 productos más vendidos de mayo</mat-label>
-          <textarea matInput [(ngModel)]="texto" rows="3" placeholder="Describe el reporte que necesitas..."></textarea>
-        </mat-form-field>
-      </div>
-      <div class="nlp-actions">
-        <button mat-raised-button color="primary" (click)="enviar()" [disabled]="procesando || !texto.trim()">
-          <mat-spinner *ngIf="procesando" diameter="18" style="display:inline-block;margin-right:8px;"></mat-spinner>
-          <mat-icon *ngIf="!procesando">auto_awesome</mat-icon>
-          {{ procesando ? 'Interpretando...' : 'Interpretar y Ejecutar' }}
-        </button>
-      </div>
-      <div *ngIf="queryInterpretada" class="query-json">
-        <h4>Query interpretada:</h4>
-        <pre>{{ queryInterpretada | json }}</pre>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .nlp-container { padding: 16px 0; }
-    .nlp-hint { color: #666; margin-bottom: 12px; }
-    .nlp-input-row { margin-bottom: 12px; }
-    .nlp-input { width: 100%; }
-    .nlp-actions { margin-bottom: 16px; }
-    .query-json { background: #f5f5f5; border-radius: 4px; padding: 12px; }
-    .query-json h4 { margin: 0 0 8px 0; font-size: 13px; color: #555; }
-    .query-json pre { margin: 0; font-size: 12px; white-space: pre-wrap; max-height: 200px; overflow: auto; }
-  `]
+  templateUrl: './texto-nlp.html',
+  styleUrl: './texto-nlp.scss'
 })
 export class TextoNLPComponent implements OnDestroy {
   @Input() isLoading = false;

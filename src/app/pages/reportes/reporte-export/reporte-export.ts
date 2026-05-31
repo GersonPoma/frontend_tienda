@@ -14,19 +14,8 @@ import pdfFonts from 'pdfmake/build/vfs_fonts';
   selector: 'app-reporte-export',
   standalone: true,
   imports: [CommonModule, MatButtonModule, MatIconModule],
-  template: `
-    <div *ngIf="resultados?.datos?.length" class="export-actions">
-      <button mat-raised-button color="primary" (click)="exportarExcel()">
-        <mat-icon>table_chart</mat-icon> Exportar Excel
-      </button>
-      <button mat-raised-button color="accent" (click)="exportarPDF()">
-        <mat-icon>picture_as_pdf</mat-icon> Exportar PDF
-      </button>
-    </div>
-  `,
-  styles: [`
-    .export-actions { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
-  `]
+  templateUrl: './reporte-export.html',
+  styleUrl: './reporte-export.scss'
 })
 export class ReporteExportComponent {
   @Input() resultados: ReporteRespuesta | null = null;
