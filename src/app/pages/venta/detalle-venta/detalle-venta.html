@@ -15,6 +15,30 @@
     </div>
 
     <div *ngIf="!isLoading && venta">
+      <!-- Cabecera Corporativa de la Empresa (si está configurada) -->
+      <div *ngIf="empresaConfig && (empresaConfig.nombre || empresaConfig.logoUrl)" 
+           class="d-flex flex-wrap align-items-center justify-content-between p-16 m-b-16"
+           style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; gap: 16px;">
+        <div class="d-flex align-items-center" style="gap: 12px; min-width: 200px;">
+          <img *ngIf="empresaConfig.logoUrl" [src]="empresaConfig.logoUrl" 
+               style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 1px solid #cbd5e1; background-color: #fff; flex-shrink: 0;" 
+               alt="Logo de la empresa">
+          <div>
+            <h2 class="m-0 f-w-600 f-s-18" style="word-break: break-word;">{{ empresaConfig.nombre || 'Mi Empresa' }}</h2>
+            <p class="m-0 text-muted f-s-12" *ngIf="empresaConfig.direccion" style="word-break: break-word;">{{ empresaConfig.direccion }}</p>
+            <p class="m-0 text-muted f-s-12" *ngIf="empresaConfig.telefono">Teléfono: {{ empresaConfig.telefono }}</p>
+          </div>
+        </div>
+        <div class="receipt-contact" style="min-width: 180px;">
+          <p class="m-0 f-s-12" *ngIf="empresaConfig.email"><strong>Contacto:</strong> {{ empresaConfig.email }}</p>
+          <div class="d-flex m-t-4" style="gap: 8px;" *ngIf="empresaConfig.facebook || empresaConfig.instagram || empresaConfig.tiktok">
+            <span *ngIf="empresaConfig.facebook" class="text-primary f-s-12">FB</span>
+            <span *ngIf="empresaConfig.instagram" class="text-danger f-s-12">IG</span>
+            <span *ngIf="empresaConfig.tiktok" class="text-dark f-s-12">TK</span>
+          </div>
+        </div>
+      </div>
+
       <div class="venta-header p-16 m-b-16">
         <div class="row">
           <div class="col-md-3">
@@ -99,8 +123,19 @@
         <h3>Total: S/ {{ totalCalculado.toFixed(2) }}</h3>
       </div>
 
-      <div *ngIf="puedeEditar" class="d-flex justify-content-end gap-8 m-t-16">
+      <div class="d-flex justify-content-end gap-8 m-t-16">
         <button
+          *ngIf="venta.estado === 'pendiente'"
+          mat-raised-button
+          color="accent"
+          [disabled]="isSaving"
+          (click)="abrirDialogoPago()">
+          <mat-icon>payments</mat-icon>
+          Procesar Pago
+        </button>
+
+        <button
+          *ngIf="puedeEditar"
           mat-raised-button
           color="primary"
           [disabled]="isSaving"

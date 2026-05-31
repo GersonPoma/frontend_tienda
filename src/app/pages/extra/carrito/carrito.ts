@@ -9,12 +9,15 @@ import { MatTableModule } from '@angular/material/table';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { CartService, Carrito } from '../../../services/cart.service';
 import { ConfigService } from '../../../services/config.service';
+import { ConfiguracionEmpresaService } from '../../../services/configuracion-empresa.service';
 import { Producto } from '../../../models/inventario/producto.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { ProcesarPagoDialogComponent } from '../../venta/detalle-venta/procesar-pago-dialog/procesar-pago-dialog';
 
 @Component({
   selector: 'app-carrito',
@@ -28,7 +31,8 @@ import { catchError } from 'rxjs/operators';
     MatTableModule,
     MatInputModule,
     MatFormFieldModule,
-    FormsModule
+    FormsModule,
+    MatDialogModule
   ],
   templateUrl: './carrito.html',
   styleUrls: ['./carrito.scss']
@@ -46,6 +50,8 @@ export class CarritoComponent implements OnInit {
     private router: Router,
     private http: HttpClient,
     private configService: ConfigService,
+    private dialog: MatDialog,
+    private configuracionService: ConfiguracionEmpresaService,
   ) {}
 
   ngOnInit(): void {
@@ -149,7 +155,8 @@ export class CarritoComponent implements OnInit {
 
   descargarPdf(): void {
     this.snackBar.open('Generando PDF...', 'Cerrar', { duration: 2000 });
-    this.cartService.descargarPdf().subscribe({
+    const config = this.configuracionService.getConfiguracion();
+    this.cartService.descargarPdf(config).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -163,6 +170,51 @@ export class CarritoComponent implements OnInit {
       },
       error: (err) => {
         this.snackBar.open('Error al generar el PDF', 'Cerrar', { duration: 3000 });
+      }
+    });
+  }
+
+  pagarCarrito(): void {
+    if (!this.carrito || !this.carrito.detalles || this.carrito.detalles.length === 0) return;
+
+    const dialogRef = this.dialog.open(ProcesarPagoDialogComponent, {
+      width: '450px',
+      disableClose: true,
+      data: { total: this.carrito.total }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.success) {
+        this.snackBar.open('Procesando pago del carrito...', 'Cerrar', { duration: 2000 });
+        
+        const baseUrlVentas = this.configService.getApiUrl('ventas');
+        const body = {
+          tipo: 'digital',
+          estado: 'completado',
+          precio_total: this.carrito!.total,
+          usuario_id: this.carrito!.usuario,
+          detalles: this.carrito!.detalles.map(item => ({
+            variante_producto_id: item.variante_producto,
+            cantidad: item.cantidad,
+            precio_unitario: item.variante_producto_info.precio
+          }))
+        };
+
+        this.http.post<any>(baseUrlVentas, body).subscribe({
+          next: (venta) => {
+            const metodoFormateado = result.metodo.toUpperCase();
+            this.snackBar.open(`¡Pago exitoso vía ${metodoFormateado}! Pedido #${venta.id} registrado con éxito.`, 'OK', { duration: 5000 });
+            
+            // Vaciar carrito e ir a los detalles de la venta
+            this.cartService.vaciarCarrito().subscribe(() => {
+              this.router.navigate(['/ventas', venta.id]);
+            });
+          },
+          error: (err) => {
+            const msg = err.error?.detail || err.error?.[0] || 'Error al procesar el pedido';
+            this.snackBar.open(msg, 'Cerrar', { duration: 5000 });
+          }
+        });
       }
     });
   }

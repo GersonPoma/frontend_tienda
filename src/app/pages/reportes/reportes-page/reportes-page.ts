@@ -53,7 +53,7 @@ import { ReporteRespuesta, NLPRespuesta } from '../../../models/reportes/reporte
           <mat-tab label="Voz">
             <ng-template matTabContent>
               <app-voz
-                (textoListo)="onVozListo($event)"
+                (ejecutar)="onEjecutarNLP($event)"
                 [isLoading]="isLoading">
               </app-voz>
             </ng-template>
@@ -112,9 +112,7 @@ export class ReportesPageComponent {
     this.nombreReporte = 'reporte-nlp';
   }
 
-  onVozListo(texto: string): void {
-    this.tabIndex = 1;
-  }
+
 
   limpiarResultados(): void {
     this.resultados = null;

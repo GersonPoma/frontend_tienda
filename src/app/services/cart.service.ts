@@ -73,8 +73,8 @@ export class CartService {
     );
   }
 
-  descargarPdf(): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}descargar_pdf/`, {
+  descargarPdf(config?: any): Observable<Blob> {
+    return this.http.post(`${this.apiUrl}descargar_pdf/`, config || {}, {
       responseType: 'blob'
     });
   }

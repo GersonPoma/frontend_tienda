@@ -18,13 +18,13 @@ h6 {
 body {
   font-family: $font-family;
   line-height: 1.334rem;
-  overflow-x: hidden;
+  overflow: hidden;
   color: var(--mat-sys-on-background);
 }
 
 .mainWrapper {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   width: 100%;
   flex: 1;
   margin-top: 0px;

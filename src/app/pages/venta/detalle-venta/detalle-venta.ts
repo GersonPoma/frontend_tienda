@@ -11,14 +11,17 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatInputModule } from '@angular/material/input';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Subject } from 'rxjs';
 import { takeUntil, switchMap } from 'rxjs/operators';
 
 import { ApiService } from '../../../services/api.service';
 import { ConfigService } from '../../../services/config.service';
 import { PermisosService } from '../../../services/permisos.service';
+import { ConfiguracionEmpresaService, EmpresaConfig } from '../../../services/configuracion-empresa.service';
 import { Venta } from '../../../models/venta/venta.model';
 import { DetalleVenta, ActualizarDetalleVenta, ActualizarVenta } from '../../../models/venta/detalle-venta.model';
+import { ProcesarPagoDialogComponent } from './procesar-pago-dialog/procesar-pago-dialog';
 
 @Component({
   selector: 'app-detalle-venta',
@@ -35,6 +38,7 @@ import { DetalleVenta, ActualizarDetalleVenta, ActualizarVenta } from '../../../
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatInputModule,
+    MatDialogModule,
   ],
   templateUrl: './detalle-venta.html',
 })
@@ -42,6 +46,7 @@ export class DetalleVentaComponent implements OnInit, OnDestroy {
   venta: Venta | null = null;
   isLoading = false;
   isSaving = false;
+  empresaConfig: EmpresaConfig | null = null;
 
   estados = ['pendiente', 'completado', 'cancelado'];
   estadoEditado: string = '';
@@ -63,11 +68,15 @@ export class DetalleVentaComponent implements OnInit, OnDestroy {
     private permisosService: PermisosService,
     private snackBar: MatSnackBar,
     private router: Router,
+    private dialog: MatDialog,
+    private configuracionService: ConfiguracionEmpresaService,
   ) {
     this.apiUrl = this.configService.getApiUrl('ventas');
   }
 
   ngOnInit(): void {
+    this.empresaConfig = this.configuracionService.getConfiguracion();
+    
     this.puedeEditar = this.permisosService.puedeEditarVenta();
     this.puedeEliminar = this.permisosService.puedeEliminarVenta();
 
@@ -235,6 +244,37 @@ export class DetalleVentaComponent implements OnInit, OnDestroy {
       case 'cancelado': return 'badge bg-danger';
       default: return 'badge bg-secondary';
     }
+  }
+
+  abrirDialogoPago(): void {
+    if (!this.venta) return;
+
+    const dialogRef = this.dialog.open(ProcesarPagoDialogComponent, {
+      width: '450px',
+      disableClose: true,
+      data: { total: this.totalCalculado }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.success) {
+        this.isSaving = true;
+        this.apiService.patch<Venta>(this.apiUrl, this.venta!.id, { estado: 'completado' })
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              const metodoFormateado = result.metodo.toUpperCase();
+              this.snackBar.open(`¡Pago exitoso vía ${metodoFormateado}! Venta completada.`, 'OK', { duration: 5000 });
+              this.isSaving = false;
+              this.recargar();
+            },
+            error: (err) => {
+              const msg = err.error?.detail || 'Error al completar el pago';
+              this.snackBar.open(msg, 'Cerrar', { duration: 5000 });
+              this.isSaving = false;
+            }
+          });
+      }
+    });
   }
 
   volver(): void {

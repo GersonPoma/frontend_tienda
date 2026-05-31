@@ -57,7 +57,7 @@ import { NLPRespuesta } from '../../../models/reportes/reporte-respuesta.model';
 })
 export class VozComponent implements OnDestroy {
   @Input() isLoading = false;
-  @Output() textoListo = new EventEmitter<string>();
+  @Output() ejecutar = new EventEmitter<NLPRespuesta>();
 
   soportado = false;
   escuchando = false;
@@ -117,7 +117,7 @@ export class VozComponent implements OnDestroy {
       .subscribe({
         next: (res) => {
           this.queryInterpretada = res.query_interpretada;
-          this.textoListo.emit(texto);
+          this.ejecutar.emit(res);
           const total = res.resultados?.paginacion?.total_registros || 0;
           this.snackBar.open(`Reporte ejecutado: ${total} registros`, 'OK', { duration: 3000 });
           this.cdr.markForCheck();

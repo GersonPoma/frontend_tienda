@@ -75,6 +75,11 @@ export class ConfigService {
       return null;  // No hay tenant en desarrollo local
     }
 
+    // Fallback para IPs locales o túneles de ngrok en desarrollo
+    if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname) || hostname.endsWith('ngrok-free.dev') || hostname.endsWith('ngrok.io')) {
+      return 'tienda-amiga';
+    }
+
     const parts = hostname.split('.');
     return parts[0];  // Devolver solo el subdominio
   }

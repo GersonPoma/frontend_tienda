@@ -104,6 +104,14 @@ export const navItems: NavItem[] = [
     iconName: 'solar:chart-square-line-duotone',
     route: '/reportes',
   },
+  {
+    navCap: 'Configuración',
+  },
+  {
+    displayName: 'Mi Empresa',
+    iconName: 'solar:settings-line-duotone',
+    route: '/configuracion',
+  },
   // {
   //   navCap: 'Home',
   // },

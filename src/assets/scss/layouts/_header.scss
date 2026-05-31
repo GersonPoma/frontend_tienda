@@ -1,7 +1,9 @@
 @use "../variables" as *;
 
 html .topbar {
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 99;
   height: $header-height;
   background-color: var(--mat-sys-background);
   display: flex;
