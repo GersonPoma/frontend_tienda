@@ -7,6 +7,10 @@ import { QbePayload } from '../models/reportes/reporte-qbe.model';
 import { ReporteRespuesta, NLPRespuesta } from '../models/reportes/reporte-respuesta.model';
 import { NLPPayload } from '../models/reportes/reporte-nlp.model';
 
+export interface TranscribeResponse {
+  texto_transcrito: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ReportesService {
   constructor(
@@ -31,6 +35,15 @@ export class ReportesService {
     return this.http.post<NLPRespuesta>(
       this.configService.getApiUrl('reporte/nlp'),
       payload
+    );
+  }
+
+  transcribirAudio(audio: Blob, filename: string): Observable<TranscribeResponse> {
+    const formData = new FormData();
+    formData.append('audio', audio, filename);
+    return this.http.post<TranscribeResponse>(
+      this.configService.getApiUrl('reporte/voz'),
+      formData
     );
   }
 }

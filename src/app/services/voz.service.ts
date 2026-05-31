@@ -3,66 +3,112 @@ import { Observable, Subject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class VozService {
-  private recognition: any = null;
-  private resultadoSubject = new Subject<string>();
+  private mediaRecorder: MediaRecorder | null = null;
+  private audioChunks: Blob[] = [];
+  private grabandoSubject = new Subject<boolean>();
+  private audioBlobSubject = new Subject<Blob>();
   private errorSubject = new Subject<string>();
-  private escuchandoSubject = new Subject<boolean>();
-
-  private recognitionInstance: any;
+  private duracionSubject = new Subject<number>();
+  private timerInterval: any = null;
+  private segundos = 0;
+  private cancelarGrabacion = false;
+  private descartando = false;
 
   isSupported(): boolean {
-    return !!(window as any).webkitSpeechRecognition || !!(window as any).SpeechRecognition;
+    return !!(navigator.mediaDevices && 'MediaRecorder' in window);
   }
 
-  iniciar(idioma: string = 'es-ES'): void {
-    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
-    if (!SpeechRecognition) {
-      this.errorSubject.next('Reconocimiento de voz no soportado');
-      return;
-    }
+  grabar(): void {
+    this.cancelarGrabacion = false;
+    this.descartando = false;
+    this.audioChunks = [];
+    this.segundos = 0;
+    this.duracionSubject.next(0);
 
-    this.recognition = new SpeechRecognition();
-    this.recognition.lang = idioma;
-    this.recognition.continuous = false;
-    this.recognition.interimResults = false;
-    this.recognition.maxAlternatives = 1;
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        if (this.cancelarGrabacion) {
+          stream.getTracks().forEach(track => track.stop());
+          this.grabandoSubject.next(false);
+          return;
+        }
 
-    this.recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      this.resultadoSubject.next(transcript);
-      this.escuchandoSubject.next(false);
-    };
+        this.mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
 
-    this.recognition.onerror = (event: any) => {
-      this.errorSubject.next(`Error: ${event.error}`);
-      this.escuchandoSubject.next(false);
-    };
+        this.mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            this.audioChunks.push(event.data);
+          }
+        };
 
-    this.recognition.onend = () => {
-      this.escuchandoSubject.next(false);
-    };
+        this.mediaRecorder.onstop = () => {
+          stream.getTracks().forEach(track => track.stop());
+          clearInterval(this.timerInterval);
+          if (!this.descartando) {
+            const blob = new Blob(this.audioChunks, { type: 'audio/webm' });
+            this.audioBlobSubject.next(blob);
+          }
+          this.grabandoSubject.next(false);
+        };
 
-    this.escuchandoSubject.next(true);
-    this.recognition.start();
+        this.mediaRecorder.onerror = () => {
+          this.errorSubject.next('Error al grabar audio.');
+          stream.getTracks().forEach(track => track.stop());
+          clearInterval(this.timerInterval);
+          this.grabandoSubject.next(false);
+        };
+
+        this.mediaRecorder.start();
+        this.grabandoSubject.next(true);
+
+        this.timerInterval = setInterval(() => {
+          this.segundos++;
+          this.duracionSubject.next(this.segundos);
+        }, 1000);
+      })
+      .catch(err => {
+        if (err.name === 'NotAllowedError') {
+          this.errorSubject.next('Permiso de micrófono denegado.');
+        } else if (err.name === 'NotFoundError') {
+          this.errorSubject.next('No se encontró un micrófono.');
+        } else {
+          this.errorSubject.next('Error al acceder al micrófono.');
+        }
+      });
   }
 
   detener(): void {
-    if (this.recognition) {
-      this.recognition.stop();
-      this.recognition = null;
+    if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+      this.mediaRecorder.stop();
+    } else {
+      this.cancelarGrabacion = true;
+      this.grabandoSubject.next(false);
     }
-    this.escuchandoSubject.next(false);
   }
 
-  get resultado$(): Observable<string> {
-    return this.resultadoSubject.asObservable();
+  eliminar(): void {
+    this.descartando = true;
+    if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+      this.mediaRecorder.stop();
+    } else {
+      this.cancelarGrabacion = true;
+      this.grabandoSubject.next(false);
+    }
+  }
+
+  get grabando$(): Observable<boolean> {
+    return this.grabandoSubject.asObservable();
+  }
+
+  get audioBlob$(): Observable<Blob> {
+    return this.audioBlobSubject.asObservable();
   }
 
   get error$(): Observable<string> {
     return this.errorSubject.asObservable();
   }
 
-  get escuchando$(): Observable<boolean> {
-    return this.escuchandoSubject.asObservable();
+  get duracion$(): Observable<number> {
+    return this.duracionSubject.asObservable();
   }
 }

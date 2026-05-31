@@ -25,65 +25,8 @@ import { ReporteRespuesta, NLPRespuesta } from '../../../models/reportes/reporte
     ReporteResultadosComponent,
     ReporteExportComponent,
   ],
-  template: `
-    <mat-card>
-      <mat-card-header>
-        <div class="page-header">
-          <mat-card-title>Reportes</mat-card-title>
-        </div>
-      </mat-card-header>
-      <mat-card-content>
-        <mat-tab-group [selectedIndex]="tabIndex" (selectedTabChange)="onTabChange($event)">
-          <mat-tab label="QBE">
-            <ng-template matTabContent>
-              <app-qbe-builder
-                (ejecutarQBE)="onEjecutarQBE($event)"
-                [isLoading]="isLoading">
-              </app-qbe-builder>
-            </ng-template>
-          </mat-tab>
-          <mat-tab label="Texto">
-            <ng-template matTabContent>
-              <app-texto-nlp
-                (ejecutar)="onEjecutarNLP($event)"
-                [isLoading]="isLoading">
-              </app-texto-nlp>
-            </ng-template>
-          </mat-tab>
-          <mat-tab label="Voz">
-            <ng-template matTabContent>
-              <app-voz
-                (ejecutar)="onEjecutarNLP($event)"
-                [isLoading]="isLoading">
-              </app-voz>
-            </ng-template>
-          </mat-tab>
-        </mat-tab-group>
-
-        <div *ngIf="resultados || errorMsg" class="m-t-24">
-          <app-reporte-resultados
-            *ngIf="resultados"
-            [resultados]="resultados"
-            [queryInterpretada]="queryInterpretada">
-          </app-reporte-resultados>
-
-          <app-reporte-export
-            *ngIf="resultados"
-            [resultados]="resultados"
-            [nombreReporte]="nombreReporte">
-          </app-reporte-export>
-
-          <div *ngIf="errorMsg" class="empty-state">
-            <mat-icon class="empty-icon">error</mat-icon>
-            <p class="empty-text">{{ errorMsg }}</p>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
-  `,
-  styles: [`
-    .m-t-24 { margin-top: 24px; }
-  `]
+  templateUrl: './reportes-page.html',
+  styleUrl: './reportes-page.scss'
 })
 export class ReportesPageComponent {
   tabIndex = 0;
