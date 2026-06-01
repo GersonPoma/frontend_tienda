@@ -1,8 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class VozService {
+  constructor(private ngZone: NgZone) {}
+
   private mediaRecorder: MediaRecorder | null = null;
   private audioChunks: Blob[] = [];
   private grabandoSubject = new Subject<boolean>();
@@ -44,18 +46,22 @@ export class VozService {
         this.mediaRecorder.onstop = () => {
           stream.getTracks().forEach(track => track.stop());
           clearInterval(this.timerInterval);
-          if (!this.descartando) {
-            const blob = new Blob(this.audioChunks, { type: 'audio/webm' });
-            this.audioBlobSubject.next(blob);
-          }
-          this.grabandoSubject.next(false);
+          this.ngZone.run(() => {
+            if (!this.descartando) {
+              const blob = new Blob(this.audioChunks, { type: 'audio/webm' });
+              this.audioBlobSubject.next(blob);
+            }
+            this.grabandoSubject.next(false);
+          });
         };
 
         this.mediaRecorder.onerror = () => {
-          this.errorSubject.next('Error al grabar audio.');
           stream.getTracks().forEach(track => track.stop());
           clearInterval(this.timerInterval);
-          this.grabandoSubject.next(false);
+          this.ngZone.run(() => {
+            this.errorSubject.next('Error al grabar audio.');
+            this.grabandoSubject.next(false);
+          });
         };
 
         this.mediaRecorder.start();
