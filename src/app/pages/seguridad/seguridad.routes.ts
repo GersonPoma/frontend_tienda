@@ -5,6 +5,7 @@ import { RolComponent } from './rol/rol';
 import { Autenticacion } from './autenticacion/autenticacion';
 import { UsuarioComponent } from './usuario/usuario';
 import { BitacoraAuditoriaComponent } from './bitacora-auditoria/bitacora-auditoria';
+import { DatabaseManagementComponent } from './database-management/database-management.component';
 import { RecuperarPasswordComponent } from './recuperar-password/recuperar-password.component';
 import { PermisosService } from '../../services/permisos.service';
 import { AuthService } from '../../services/auth.service';
@@ -89,6 +90,21 @@ export const SeguridadRoutes: Routes = [
       urls: [
         { title: 'Seguridad', url: '/seguridad' },
         { title: 'Bitacora de Auditoria' },
+      ]
+    }
+  },
+  {
+    path: 'base-de-datos',
+    component: DatabaseManagementComponent,
+    canActivate: [canAccessWithPermiso([
+      PermisosService.SEGURIDAD_VIEW_USUARIO,
+      PermisosService.AUTH_VIEW_GROUP,
+    ])],
+    data: {
+      title: 'Gestión de Base de Datos',
+      urls: [
+        { title: 'Seguridad', url: '/seguridad' },
+        { title: 'Gestión de Base de Datos' },
       ]
     }
   }

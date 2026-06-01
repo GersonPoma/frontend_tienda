@@ -10,6 +10,7 @@ export const navItems: NavItem[] = [
       PermisosService.SEGURIDAD_VIEW_BITACORA,
     ],
   },
+
   {
     displayName: 'Usuarios',
     iconName: 'solar:user-id-line-duotone',
@@ -31,6 +32,15 @@ export const navItems: NavItem[] = [
       PermisosService.SEGURIDAD_VIEW_USUARIO,
       PermisosService.AUTH_VIEW_GROUP,
       PermisosService.AUTH_VIEW_PERMISSION,
+    ]
+  },
+  {
+    displayName: 'Base de Datos',
+    iconName: 'solar:database-line-duotone',
+    route: '/seguridad/base-de-datos',
+    permiso: [
+      PermisosService.SEGURIDAD_VIEW_USUARIO,
+      PermisosService.AUTH_VIEW_GROUP,
     ]
   },
   {
