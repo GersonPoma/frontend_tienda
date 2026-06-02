@@ -20,6 +20,12 @@
   margin-bottom: 8px;
 }
 
+.lightbox-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .lightbox-title {
   font-size: 16px;
   font-weight: 600;
@@ -71,6 +77,37 @@
   align-items: center;
   gap: 8px;
   color: #8b93a1;
+}
+
+.capture-error {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #fff3e0;
+  color: #8a4b08;
+  font-size: 12px;
+  box-shadow: 0 6px 16px rgba(138, 75, 8, 0.2);
+}
+
+.ar-note {
+  position: absolute;
+  bottom: 54px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: min(520px, 92%);
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(15, 20, 30, 0.85);
+  color: #e3f2fd;
+  font-size: 12px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(15, 20, 30, 0.25);
 }
 
 .nav-button {

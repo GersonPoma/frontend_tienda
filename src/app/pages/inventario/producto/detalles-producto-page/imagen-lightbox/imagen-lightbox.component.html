@@ -1,9 +1,15 @@
 <div class="lightbox">
   <div class="lightbox-header">
     <div class="lightbox-title">{{ data.title || 'Imagen' }}</div>
-    <button mat-icon-button (click)="cerrar()" aria-label="Cerrar">
-      <mat-icon>close</mat-icon>
-    </button>
+    <div class="lightbox-actions">
+      <button *ngIf="isModelView" mat-stroked-button color="primary" (click)="capturarModelo3d()" aria-label="Capturar modelo 3D">
+        <mat-icon>photo_camera</mat-icon>
+        Capturar
+      </button>
+      <button mat-icon-button (click)="cerrar()" aria-label="Cerrar">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
   </div>
 
   <div class="lightbox-body" [class.model-view]="isModelView">
@@ -12,7 +18,8 @@
     </button>
 
     <div class="image-frame">
-      <model-viewer *ngIf="isModelView"
+            <model-viewer *ngIf="isModelView"
+              #modelViewer
               [attr.src]="data.modelUrl"
               camera-controls
               ar
@@ -32,6 +39,13 @@
       <div *ngIf="isModelView && modelError" class="empty">
         <mat-icon>error</mat-icon>
         <span>{{ modelError }}</span>
+      </div>
+      <div *ngIf="isModelView" class="ar-note">
+        Para capturar en AR, usa la captura del sistema (botones del telefono).
+      </div>
+      <div *ngIf="isModelView && captureError" class="capture-error">
+        <mat-icon>warning</mat-icon>
+        <span>{{ captureError }}</span>
       </div>
       <img *ngIf="!isModelView && imagenActualUrl" [src]="imagenActualUrl" alt="Imagen" />
       <div *ngIf="!isModelView && !imagenActualUrl" class="empty">

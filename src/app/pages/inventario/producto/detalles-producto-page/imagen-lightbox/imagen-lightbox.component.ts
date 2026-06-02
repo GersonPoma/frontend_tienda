@@ -1,4 +1,4 @@
-import { Component, Inject, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, Inject, CUSTOM_ELEMENTS_SCHEMA, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -27,6 +27,9 @@ export class ImagenLightboxComponent {
   modelError: string | null = null;
   modelProgress = 0;
   isModelLoading = false;
+  captureError: string | null = null;
+
+  @ViewChild('modelViewer') modelViewer?: ElementRef<HTMLElement>;
 
   constructor(
     public dialogRef: MatDialogRef<ImagenLightboxComponent>,
@@ -84,5 +87,39 @@ export class ImagenLightboxComponent {
       : 0;
     this.modelProgress = progress;
     this.isModelLoading = progress < 100;
+  }
+
+  capturarModelo3d(): void {
+    if (!this.isModelView) return;
+    this.captureError = null;
+
+    try {
+      const element = this.modelViewer?.nativeElement as any;
+      let dataUrl: string | null = null;
+
+      if (element && typeof element.toDataURL === 'function') {
+        dataUrl = element.toDataURL();
+      } else {
+        const canvas = element?.shadowRoot?.querySelector('canvas') as HTMLCanvasElement | null;
+        dataUrl = canvas?.toDataURL('image/png') || null;
+      }
+
+      if (!dataUrl) {
+        throw new Error('No se pudo generar la imagen del modelo');
+      }
+
+      const link = document.createElement('a');
+      const baseName = (this.data.title || 'modelo-3d')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      link.href = dataUrl;
+      link.download = `${baseName || 'modelo-3d'}-${timestamp}.png`;
+      link.click();
+    } catch (error) {
+      console.error('Error al capturar el modelo 3D:', error);
+      this.captureError = 'No se pudo guardar la captura. Intenta de nuevo.';
+    }
   }
 }
