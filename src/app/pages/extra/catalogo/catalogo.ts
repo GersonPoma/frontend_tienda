@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from 'src/app/services/api.service';
 import { ConfigService } from 'src/app/services/config.service';
 import { CartService } from 'src/app/services/cart.service';
+import { FavoritosService } from 'src/app/services/favoritos.service';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MaterialModule } from 'src/app/material.module';
@@ -60,6 +61,7 @@ export class CatalogoComponent implements OnInit {
   categoriaSeleccionada: number | null = null;
   terminoBusqueda: string = '';
   cargando: boolean = true;
+  favoritosIds: Set<number> = new Set();
   
   private searchSubject = new Subject<string>();
 
@@ -67,6 +69,7 @@ export class CatalogoComponent implements OnInit {
     private apiService: ApiService,
     private configService: ConfigService,
     private cartService: CartService,
+    private favoritosService: FavoritosService,
     private snackBar: MatSnackBar,
     private router: Router
   ) {
@@ -83,6 +86,9 @@ export class CatalogoComponent implements OnInit {
   ngOnInit(): void {
     this.cargarCategorias();
     this.cargarProductos();
+    this.favoritosService.favoritos$.subscribe(favoritos => {
+      this.favoritosIds = new Set(favoritos.map(f => f.producto_id));
+    });
   }
 
   cargarCategorias(): void {
@@ -128,5 +134,31 @@ export class CatalogoComponent implements OnInit {
 
   verDetalles(id: number): void {
     this.router.navigate(['/inventario/productos', id]);
+  }
+
+  esFavorito(productoId: number): boolean {
+    return this.favoritosIds.has(productoId);
+  }
+
+  toggleFavorito(prod: Producto): void {
+    if (this.esFavorito(prod.id)) {
+      this.favoritosService.eliminarPorProducto(prod.id).subscribe({
+        next: () => {
+          this.snackBar.open(`${prod.nombre} eliminado de favoritos`, 'Cerrar', { duration: 2000 });
+        },
+        error: () => {
+          this.snackBar.open('Error al quitar de favoritos', 'Cerrar', { duration: 3000 });
+        }
+      });
+    } else {
+      this.favoritosService.agregar(prod.id).subscribe({
+        next: () => {
+          this.snackBar.open(`${prod.nombre} agregado a favoritos`, 'Cerrar', { duration: 2000 });
+        },
+        error: (err) => {
+          this.snackBar.open(err.error?.error || 'Error al agregar a favoritos', 'Cerrar', { duration: 3000 });
+        }
+      });
+    }
   }
 }

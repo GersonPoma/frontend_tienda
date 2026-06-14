@@ -16,6 +16,7 @@ import { Subject, takeUntil, forkJoin } from 'rxjs';
 import { ConfigService } from '../../../../services/config.service';
 import { ApiService } from '../../../../services/api.service';
 import { CartService } from '../../../../services/cart.service';
+import { FavoritosService } from '../../../../services/favoritos.service';
 import { AuthService } from '../../../../services/auth.service';
 import { PermisosService } from '../../../../services/permisos.service';
 
@@ -55,6 +56,7 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
   isLoadingVariantes = false;
   isLoadingRecomendados = false;
   isSaving = false;
+  esFavorito = false;
 
   archivoSeleccionado: File | null = null;
   previewUrl: string | null = null;
@@ -81,6 +83,7 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
     private configService: ConfigService,
     private snackBar: MatSnackBar,
     private cartService: CartService,
+    private favoritosService: FavoritosService,
     private dialog: MatDialog,
     private authService: AuthService,
     public permisosService: PermisosService
@@ -103,6 +106,10 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
         this.cargarProducto();
         this.cargarVariantes();
       });
+
+    this.favoritosService.favoritos$.subscribe(favoritos => {
+      this.esFavorito = favoritos.some(f => f.producto_id === this.productoId);
+    });
   }
 
   private cargarRecomendados(): void {
@@ -446,6 +453,21 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
       });
   }
   
+  toggleFavorito(): void {
+    if (this.esFavorito) {
+      this.favoritosService.eliminarPorProducto(this.productoId).subscribe();
+    } else {
+      this.favoritosService.agregar(this.productoId).subscribe({
+        next: () => {
+          this.snackBar.open('Producto agregado a favoritos', 'Cerrar', { duration: 2000 });
+        },
+        error: (err) => {
+          this.snackBar.open(err.error?.error || 'Error al agregar a favoritos', 'Cerrar', { duration: 3000 });
+        }
+      });
+    }
+  }
+
   agregarAlCarrito(variante: VarianteProducto): void {
     this.cartService.agregarProducto(variante.id, 1).subscribe({
       next: () => {

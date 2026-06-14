@@ -33,6 +33,12 @@
         <img [src]="prod.imagen_principal || 'assets/images/products/placeholder.jpg'" [alt]="prod.nombre"
           class="product-image">
         <div class="category-badge">{{ prod.categoria_nombre }}</div>
+        <button class="fav-btn" mat-icon-button (click)="$event.stopPropagation(); toggleFavorito(prod)"
+          [matTooltip]="esFavorito(prod.id) ? 'Quitar de favoritos' : 'Agregar a favoritos'">
+          <mat-icon [class.favorito-activo]="esFavorito(prod.id)">
+            {{ esFavorito(prod.id) ? 'favorite' : 'favorite_border' }}
+          </mat-icon>
+        </button>
       </div>
 
       <mat-card-content class="p-16">

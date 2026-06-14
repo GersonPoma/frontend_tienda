@@ -43,7 +43,14 @@
 
           <!-- Datos del Producto -->
           <div style="flex: 1; min-width: 300px;">
-            <h3 style="margin: 0 0 16px 0; color: #1976d2;">{{ producto.nombre }}</h3>
+            <div style="display: flex; align-items: center; gap: 8px; margin: 0 0 16px 0;">
+              <h3 style="margin: 0; color: #1976d2;">{{ producto.nombre }}</h3>
+              <button mat-icon-button (click)="toggleFavorito()"
+                [matTooltip]="esFavorito ? 'Quitar de favoritos' : 'Agregar a favoritos'"
+                [style.color]="esFavorito ? '#e91e63' : '#666'">
+                <mat-icon>{{ esFavorito ? 'favorite' : 'favorite_border' }}</mat-icon>
+              </button>
+            </div>
 
             <div style="display: grid; gap: 12px;">
               <div>
