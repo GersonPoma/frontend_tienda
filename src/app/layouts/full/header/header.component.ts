@@ -21,6 +21,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from 'src/app/services/auth.service';
 import { CartService } from 'src/app/services/cart.service';
+import { FavoritosService } from 'src/app/services/favoritos.service';
 import { ConfigurarAtajosComponent } from 'src/app/components/configurar-atajos/configurar-atajos.component';
 
 import { Subject } from 'rxjs';
@@ -55,6 +56,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     public cartService: CartService,
+    public favoritosService: FavoritosService,
     private router: Router,
     private dialog: MatDialog,
   ) {}

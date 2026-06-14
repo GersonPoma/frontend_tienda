@@ -41,6 +41,18 @@ export const PagesRoutes: Routes = [
       import('./venta/venta.routes').then((m) => m.VentaRoutes),
   },
   {
+    path: 'favoritos',
+    loadComponent: () =>
+      import('./favoritos/favoritos.component').then((m) => m.FavoritosComponent),
+    data: {
+      title: 'Mis Favoritos',
+      urls: [
+        { title: 'Dashboard', url: '/' },
+        { title: 'Mis Favoritos' }
+      ]
+    }
+  },
+  {
     path: 'configuracion',
     loadComponent: () =>
       import('./empresa/configuracion/configuracion.component').then((m) => m.ConfiguracionComponent),
