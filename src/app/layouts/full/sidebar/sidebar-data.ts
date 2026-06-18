@@ -3,6 +3,11 @@ import { PermisosService } from '../../../services/permisos.service';
 
 export const navItems: NavItem[] = [
   {
+    displayName: 'Dashboard',
+    iconName: 'solar:pie-chart-2-line-duotone',
+    route: '/',
+  },
+  {
     navCap: 'Seguridad',
     permiso: [
       PermisosService.SEGURIDAD_VIEW_USUARIO,
@@ -113,6 +118,19 @@ export const navItems: NavItem[] = [
     displayName: 'Reportes',
     iconName: 'solar:chart-square-line-duotone',
     route: '/reportes',
+  },
+  {
+    navCap: 'Inteligencia Artificial',
+  },
+  {
+    displayName: 'Predicción',
+    iconName: 'solar:graph-line-duotone',
+    route: '/ia/prediccion',
+  },
+  {
+    displayName: 'Alertas IA',
+    iconName: 'solar:bell-bing-line-duotone',
+    route: '/ia/alertas',
   },
   {
     navCap: 'Configuración',
