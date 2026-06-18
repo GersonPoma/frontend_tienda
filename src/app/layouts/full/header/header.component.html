@@ -7,6 +7,17 @@
   <!-- Spacer para empujar el menú de usuario a la derecha -->
   <span class="spacer"></span>
 
+  <!-- Alertas IA -->
+  <button mat-icon-button routerLink="/ia/alertas" matTooltip="Alertas de Reabastecimiento IA" class="m-r-8"
+          *ngIf="!esCliente()">
+    <mat-icon
+      [matBadge]="conteoAlertasNoLeidas()"
+      matBadgeColor="warn"
+      [matBadgeHidden]="conteoAlertasNoLeidas() === 0">
+      notifications
+    </mat-icon>
+  </button>
+
   <!-- Favoritos -->
   <button mat-icon-button routerLink="/favoritos" matTooltip="Mis Favoritos" class="m-r-8">
     <mat-icon [matBadge]="favoritosService.obtenerCantidadItems()" matBadgeColor="warn" [matBadgeHidden]="favoritosService.obtenerCantidadItems() === 0">favorite</mat-icon>
