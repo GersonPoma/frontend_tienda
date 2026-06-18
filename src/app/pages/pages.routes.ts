@@ -64,4 +64,9 @@ export const PagesRoutes: Routes = [
       ]
     }
   },
+  {
+    path: 'ia',
+    loadChildren: () =>
+      import('./ia/ia.routes').then((m) => m.IaRoutes),
+  },
 ];
