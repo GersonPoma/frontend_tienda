@@ -93,8 +93,6 @@ export class UsuarioComponent implements OnInit, OnDestroy {
         next: (data: Pagination<Usuario>) => {
           this.dataSource = data.results;
           this.totalItems = data.count;
-          // Actualizar pageSize dinámicamente basado en lo que retorna el backend
-          this.pageSize = data.results.length;
           this.isLoading = false;
         },
         error: (error) => {
