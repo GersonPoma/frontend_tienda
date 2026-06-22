@@ -35,14 +35,22 @@
 
 mat-dialog-content {
   min-width: 360px;
-  padding-bottom: 8px !important;
 
   @media (max-width: 480px) {
     min-width: unset;
   }
 }
 
-::ng-deep .mat-mdc-dialog-actions {
-  padding-top: 12px !important;
-  border-top: 1px solid #f0f0f0;
+.actions-spacer {
+  height: 8px;
+  flex-shrink: 0;
+}
+
+app-renovar-dialog .mat-mdc-dialog-actions {
+  padding-top: 12px;
+}
+
+app-renovar-dialog .mat-mdc-dialog-content {
+  overflow: visible;
+  padding-bottom: 0;
 }

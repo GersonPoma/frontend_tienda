@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -22,7 +22,8 @@ export interface RenovarDialogData {
     MatDialogModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatIconModule
   ],
   templateUrl: './renovar-dialog.component.html',
-  styleUrl: './renovar-dialog.component.scss'
+  styleUrl: './renovar-dialog.component.scss',
+  encapsulation: ViewEncapsulation.None
 })
 export class RenovarDialogComponent {
   motivo = '';

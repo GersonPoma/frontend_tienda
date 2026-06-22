@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
@@ -15,7 +15,8 @@ import { MatIconModule } from '@angular/material/icon';
     MatDialogModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatIconModule
   ],
   templateUrl: './cancelar-dialog.component.html',
-  styleUrl: './cancelar-dialog.component.scss'
+  styleUrl: './cancelar-dialog.component.scss',
+  encapsulation: ViewEncapsulation.None
 })
 export class CancelarDialogComponent {
   canceladaPor = '';
