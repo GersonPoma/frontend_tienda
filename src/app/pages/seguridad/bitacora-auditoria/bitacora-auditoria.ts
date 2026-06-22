@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -16,6 +16,14 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subject, takeUntil } from 'rxjs';
 import { BitacoraAuditoria } from 'src/app/models/bitacora-auditoria.model'; 
+import { ConfigService } from 'src/app/services/config.service';
+
+interface BitacoraPaginatedResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: BitacoraAuditoria[];
+}
 
 @Component({
   selector: 'app-bitacora-auditoria',
@@ -43,11 +51,11 @@ export class BitacoraAuditoriaComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = [
     'fecha',
     'hora',
-    'usuario',
+    'usuario_username',
     'accion',
     'entidad',
-    'metodo',
     'ruta',
+    'metodo',
     'estado_http',
     'ip_cliente',
     'detalles',
@@ -76,13 +84,12 @@ export class BitacoraAuditoriaComponent implements OnInit, OnDestroy {
 
   metodos = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
 
-  private readonly apiUrl = 'http://127.0.0.1:8000/api/bitacora/';
-  private readonly tenant = 'tienda_amiga';
   private destroy$ = new Subject<void>();
 
   constructor(
     private http: HttpClient,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private configService: ConfigService
   ) {}
 
   ngOnInit(): void {
@@ -97,10 +104,10 @@ export class BitacoraAuditoriaComponent implements OnInit, OnDestroy {
   loadBitacora(): void {
     this.isLoading = true;
 
-    this.http.get<unknown>(this.apiUrl, {
-      headers: new HttpHeaders({ 'X-Tenant': this.tenant }),
-      params: this.getParams(),
-    })
+    this.http.get<BitacoraPaginatedResponse>(
+      this.configService.getApiUrl('bitacora'),
+      { params: this.getParams() }
+    )
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
@@ -141,6 +148,14 @@ export class BitacoraAuditoriaComponent implements OnInit, OnDestroy {
   }
 
   getUsuario(registro: BitacoraAuditoria): string {
+    if (registro.usuario_username) {
+      return registro.usuario_username;
+    }
+
+    if (registro.username) {
+      return registro.username;
+    }
+
     if (registro.usuarios_id) {
       return `Usuario #${registro.usuarios_id}`;
     }
@@ -157,7 +172,7 @@ export class BitacoraAuditoriaComponent implements OnInit, OnDestroy {
       return registro.usuario.nombre_completo || registro.usuario.username || registro.usuario.email || 'Usuario';
     }
 
-    return registro.username || registro.usuario_username || 'Sistema';
+    return 'Sistema';
   }
 
   getAccion(registro: BitacoraAuditoria): string {

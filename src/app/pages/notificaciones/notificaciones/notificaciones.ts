@@ -20,7 +20,10 @@ import {
   NotificacionPush,
   Promocion,
 } from 'src/app/models/notificaciones.model';
+import { Producto } from 'src/app/models/inventario/producto.model';
 import { NotificacionesService } from 'src/app/services/notificaciones.service';
+import { ApiService } from 'src/app/services/api.service';
+import { ConfigService } from 'src/app/services/config.service';
 
 @Component({
   selector: 'app-notificaciones',
@@ -48,11 +51,24 @@ import { NotificacionesService } from 'src/app/services/notificaciones.service';
 export class NotificacionesComponent implements OnInit, OnDestroy {
   promociones: Promocion[] = [];
   notificaciones: NotificacionPush[] = [];
-  promocionesColumns = ['titulo', 'producto', 'descuento', 'vigencia', 'estado', 'fecha_publicacion', 'acciones'];
+  productos: Producto[] = [];
+  promocionesColumns = [
+    'id',
+    'titulo',
+    'descripcion',
+    'producto_nombre',
+    'tipo_descuento',
+    'valor_descuento',
+    'estado',
+    'fecha_inicio',
+    'fecha_fin',
+    'acciones',
+  ];
   notificacionesColumns = ['usuario', 'endpoint', 'activa', 'ultima_promocion', 'ultimo_envio', 'ultimo_error'];
 
   isLoadingPromociones = false;
   isLoadingNotificaciones = false;
+  isLoadingProductos = false;
   isSaving = false;
   isPublishingId: number | string | null = null;
   isPushBusy = false;
@@ -62,13 +78,7 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
 
   tiposDescuento = [
     { value: 'porcentaje', label: 'Porcentaje' },
-    { value: 'monto', label: 'Monto fijo' },
-  ];
-
-  estadosPromocion = [
-    { value: 'BORRADOR', label: 'Borrador' },
-    { value: 'ACTIVA', label: 'Activa' },
-    { value: 'INACTIVA', label: 'Inactiva' },
+    { value: 'monto_fijo', label: 'Monto fijo' },
   ];
 
   promocionForm = this.fb.group({
@@ -79,7 +89,6 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
     valor_descuento: [0, [Validators.required, Validators.min(0)]],
     fecha_inicio: ['', Validators.required],
     fecha_fin: ['', Validators.required],
-    estado: ['BORRADOR'],
   });
 
   private destroy$ = new Subject<void>();
@@ -87,11 +96,14 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private notificacionesService: NotificacionesService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private apiService: ApiService,
+    private configService: ConfigService
   ) {}
 
   ngOnInit(): void {
     this.checkPushState();
+    this.loadProductos();
     this.loadPromociones();
     this.loadNotificaciones();
   }
@@ -135,6 +147,28 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
       });
   }
 
+  loadProductos(): void {
+    this.isLoadingProductos = true;
+    this.apiService.getWithPagination<Producto>(
+      this.configService.getApiUrl('productos'),
+      1,
+      100
+    )
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.productos = data.results;
+          this.isLoadingProductos = false;
+        },
+        error: (error) => {
+          console.error('Error al cargar productos:', error);
+          this.productos = [];
+          this.isLoadingProductos = false;
+          this.snackBar.open('Error al cargar productos', 'Cerrar', { duration: 5000 });
+        },
+      });
+  }
+
   crearPromocion(): void {
     if (this.promocionForm.invalid) {
       this.promocionForm.markAllAsTouched();
@@ -151,7 +185,6 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
       valor_descuento: Number(raw.valor_descuento || 0),
       fecha_inicio: this.toIsoDate(raw.fecha_inicio || ''),
       fecha_fin: this.toIsoDate(raw.fecha_fin || ''),
-      estado: raw.estado || 'BORRADOR',
     };
 
     this.isSaving = true;
@@ -170,7 +203,6 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
             valor_descuento: 0,
             fecha_inicio: '',
             fecha_fin: '',
-            estado: 'BORRADOR',
           });
           this.loadPromociones();
         },
@@ -211,6 +243,11 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (!window.isSecureContext) {
+      this.snackBar.open('Push requiere HTTPS o localhost', 'Cerrar', { duration: 5000 });
+      return;
+    }
+
     this.isPushBusy = true;
 
     try {
@@ -223,66 +260,60 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.notificacionesService.getVapidPublicKey()
+      const response = await this.notificacionesService.getVapidPublicKey();
+      const publicKey =
+        response?.['public_key'] ||
+        response?.['publicKey'] ||
+        response?.['vapid_public_key'] ||
+        response?.['vapidPublicKey'];
+
+      console.log('Notification.permission:', Notification.permission);
+      console.log('window.isSecureContext:', window.isSecureContext);
+      console.log('ServiceWorker soportado:', 'serviceWorker' in navigator);
+      console.log('PushManager soportado:', 'PushManager' in window);
+      console.log('VAPID response:', response);
+      console.log('VAPID publicKey:', publicKey);
+
+      if (!publicKey || typeof publicKey !== 'string' || !publicKey.trim()) {
+        throw new Error(
+          `No se recibio la clave publica VAPID. Campos recibidos: ${Object.keys(response || {}).join(', ')}`
+        );
+      }
+
+      const subscription = await this.createPushSubscription(publicKey.trim());
+
+      const json = subscription.toJSON();
+      const keys = json.keys;
+
+      if (!keys?.['p256dh'] || !keys?.['auth']) {
+        throw new Error('La suscripcion push no devolvio llaves validas');
+      }
+
+      this.notificacionesService.suscribirse({
+        endpoint: subscription.endpoint,
+        keys: {
+          p256dh: keys['p256dh'],
+          auth: keys['auth'],
+        },
+      })
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: async (response) => {
-            try {
-              const publicKey = this.extractVapidKey(response);
-              if (!publicKey) {
-                throw new Error('No se recibio la clave publica VAPID');
-              }
-
-              const registration = await navigator.serviceWorker.register('/assets/push-sw.js');
-              const currentSubscription = await registration.pushManager.getSubscription();
-              const subscription = currentSubscription || await registration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: this.urlBase64ToUint8Array(publicKey),
-              });
-
-              const json = subscription.toJSON();
-              const keys = json.keys;
-
-              if (!keys?.['p256dh'] || !keys?.['auth']) {
-                throw new Error('La suscripcion push no devolvio llaves validas');
-              }
-
-              this.notificacionesService.suscribirse({
-                endpoint: subscription.endpoint,
-                p256dh: keys['p256dh'],
-                auth: keys['auth'],
-                user_agent: navigator.userAgent,
-              })
-                .pipe(takeUntil(this.destroy$))
-                .subscribe({
-                  next: () => {
-                    this.pushActiva = true;
-                    this.isPushBusy = false;
-                    this.snackBar.open('Notificaciones activadas', 'OK', { duration: 3000 });
-                    this.loadNotificaciones();
-                  },
-                  error: (error) => {
-                    console.error('Error al guardar suscripcion:', error);
-                    this.isPushBusy = false;
-                    this.snackBar.open('No se pudo guardar la suscripcion', 'Cerrar', { duration: 5000 });
-                  },
-                });
-            } catch (error) {
-              console.error('Error al activar push:', error);
-              this.isPushBusy = false;
-              this.snackBar.open('No se pudo activar el push. Revisa las claves VAPID.', 'Cerrar', { duration: 5000 });
-            }
+          next: () => {
+            this.pushActiva = true;
+            this.isPushBusy = false;
+            this.snackBar.open('Notificaciones activadas', 'OK', { duration: 3000 });
+            this.loadNotificaciones();
           },
           error: (error) => {
-            console.error('Error al obtener VAPID:', error);
+            console.error('Error al guardar suscripcion:', error);
             this.isPushBusy = false;
-            this.snackBar.open('No se pudo obtener la clave publica VAPID', 'Cerrar', { duration: 5000 });
+            this.snackBar.open('No se pudo guardar la suscripcion', 'Cerrar', { duration: 5000 });
           },
         });
     } catch (error) {
-      console.error('Error solicitando permisos push:', error);
+      this.logPushError(error);
       this.isPushBusy = false;
-      this.snackBar.open('No se pudo solicitar permiso de notificaciones', 'Cerrar', { duration: 5000 });
+      this.snackBar.open(error instanceof Error ? error.message : 'No se pudo activar el push', 'Cerrar', { duration: 6000 });
     }
   }
 
@@ -292,7 +323,7 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
     }
 
     this.isPushBusy = true;
-    const registration = await navigator.serviceWorker.getRegistration('/assets/push-sw.js');
+    const registration = await this.getCurrentPushRegistration();
     const subscription = await registration?.pushManager.getSubscription();
 
     if (!subscription) {
@@ -320,6 +351,27 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
       });
   }
 
+  probarNotificacion(): void {
+    this.isPushBusy = true;
+    this.notificacionesService.probar({
+      titulo: 'Prueba',
+      mensaje: 'Las notificaciones funcionan',
+    })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.isPushBusy = false;
+          this.snackBar.open('Notificacion de prueba enviada', 'OK', { duration: 3000 });
+          this.loadNotificaciones();
+        },
+        error: (error) => {
+          console.error('Error al probar notificacion:', error);
+          this.isPushBusy = false;
+          this.snackBar.open('No se pudo enviar la notificacion de prueba', 'Cerrar', { duration: 5000 });
+        },
+      });
+  }
+
   getEstadoColor(estado?: string): 'primary' | 'accent' | 'warn' {
     const normalized = (estado || '').toLowerCase();
 
@@ -339,6 +391,15 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
     return promocion.tipo_descuento?.toLowerCase() === 'porcentaje' ? `${valor}%` : `Bs ${valor}`;
   }
 
+  getProductoNombre(promocion: Promocion): string {
+    if (promocion.producto_nombre) {
+      return promocion.producto_nombre;
+    }
+
+    const producto = this.productos.find((item) => String(item.id) === String(promocion.producto));
+    return producto?.nombre || `Producto #${promocion.producto}`;
+  }
+
   getEndpointCorto(endpoint: string): string {
     if (!endpoint) {
       return '-';
@@ -355,9 +416,137 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const registration = await navigator.serviceWorker.getRegistration('/assets/push-sw.js');
+    const registration = await this.getCurrentPushRegistration();
     const subscription = await registration?.pushManager.getSubscription();
     this.pushActiva = !!subscription;
+  }
+
+  private async getPushRegistration(): Promise<ServiceWorkerRegistration> {
+    const scriptUrl = await this.getAvailablePushWorkerScript();
+    return this.registerPushWorker(scriptUrl);
+  }
+
+  private async getCurrentPushRegistration(): Promise<ServiceWorkerRegistration | undefined> {
+    const rootRegistration = await this.getRegistrationSafely('/');
+    const assetsRegistration = await this.getRegistrationSafely('/assets/');
+
+    return rootRegistration || assetsRegistration;
+  }
+
+  private async getRegistrationSafely(scope: string): Promise<ServiceWorkerRegistration | undefined> {
+    try {
+      return await navigator.serviceWorker.getRegistration(scope);
+    } catch (error) {
+      console.warn(`No se pudo consultar el service worker ${scope}:`, error);
+      return undefined;
+    }
+  }
+
+  private async getAvailablePushWorkerScript(): Promise<string> {
+    const candidates = ['/push-sw.js', '/assets/push-sw.js'];
+
+    for (const scriptUrl of candidates) {
+      try {
+        const response = await fetch(scriptUrl, { cache: 'no-store' });
+
+        if (response.ok) {
+          return scriptUrl;
+        }
+      } catch (error) {
+        console.warn(`No se pudo verificar ${scriptUrl}:`, error);
+      }
+    }
+
+    throw new Error('No se encontro el archivo push-sw.js en el frontend');
+  }
+
+  private async createPushSubscription(publicKey: string): Promise<PushSubscription> {
+    const scripts = await this.getAvailablePushWorkerScripts();
+    let lastError: unknown;
+    const applicationServerKey = this.urlBase64ToUint8Array(publicKey);
+
+    console.log('VAPID longitud convertida:', applicationServerKey.byteLength);
+
+    for (const scriptUrl of scripts) {
+      try {
+        const registration = await this.registerPushWorker(scriptUrl);
+        console.log('Service worker registrado:', {
+          scriptUrl,
+          scope: registration.scope,
+          active: registration.active?.state,
+          installing: registration.installing?.state,
+          waiting: registration.waiting?.state,
+        });
+
+        const currentSubscription = await registration.pushManager.getSubscription();
+
+        if (currentSubscription) {
+          console.log('Suscripcion push existente:', currentSubscription.toJSON());
+          return currentSubscription;
+        }
+
+        return await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey,
+        });
+      } catch (error) {
+        console.warn(`No se pudo activar push con ${scriptUrl}`);
+        this.logPushError(error);
+        lastError = error;
+      }
+    }
+
+    throw lastError instanceof Error ? lastError : new Error('No se pudo crear la suscripcion push');
+  }
+
+  private async getAvailablePushWorkerScripts(): Promise<string[]> {
+    const candidates = ['/push-sw.js', '/assets/push-sw.js'];
+    const available: string[] = [];
+
+    for (const scriptUrl of candidates) {
+      try {
+        const response = await fetch(scriptUrl, { cache: 'no-store' });
+
+        if (response.ok) {
+          available.push(scriptUrl);
+        }
+      } catch (error) {
+        console.warn(`No se pudo verificar ${scriptUrl}:`, error);
+      }
+    }
+
+    if (!available.length) {
+      throw new Error('No se encontro el archivo push-sw.js en el frontend');
+    }
+
+    return available;
+  }
+
+  private async registerPushWorker(scriptUrl: string): Promise<ServiceWorkerRegistration> {
+    const registration = await navigator.serviceWorker.register(scriptUrl);
+
+    if (!registration.active && registration.installing) {
+      await this.waitForServiceWorker(registration.installing);
+    }
+
+    return registration;
+  }
+
+  private async waitForServiceWorker(worker: ServiceWorker): Promise<void> {
+    if (worker.state === 'activated') {
+      return;
+    }
+
+    await new Promise<void>((resolve, reject) => {
+      const timeout = window.setTimeout(() => reject(new Error('El service worker no se activo a tiempo')), 8000);
+
+      worker.addEventListener('statechange', () => {
+        if (worker.state === 'activated') {
+          window.clearTimeout(timeout);
+          resolve();
+        }
+      });
+    });
   }
 
   private getList<T>(response: T[] | { results?: T[] }): T[] {
@@ -374,14 +563,6 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
     }
 
     return new Date(value).toISOString();
-  }
-
-  private extractVapidKey(response: string | Record<string, string>): string {
-    if (typeof response === 'string') {
-      return response;
-    }
-
-    return response['publicKey'] || response['public_key'] || response['vapid_public_key'] || '';
   }
 
   private getBackendError(error: unknown, fallback: string): string {
@@ -411,6 +592,16 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
     return fallback;
   }
 
+  private logPushError(error: unknown): void {
+    console.error('Error al activar push:', error);
+
+    if (error instanceof DOMException) {
+      console.error('DOMException.name:', error.name);
+      console.error('DOMException.message:', error.message);
+      console.error('DOMException.code:', error.code);
+    }
+  }
+
   private urlBase64ToUint8Array(base64String: string): ArrayBuffer {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
     const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -421,6 +612,6 @@ export class NotificacionesComponent implements OnInit, OnDestroy {
       outputArray[i] = rawData.charCodeAt(i);
     }
 
-    return outputArray.buffer as ArrayBuffer;
+    return outputArray.buffer.slice(outputArray.byteOffset, outputArray.byteOffset + outputArray.byteLength);
   }
 }

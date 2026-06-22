@@ -85,6 +85,24 @@ export class ConfigService {
   }
 
   /**
+   * Tenant normalizado para enviar al backend por header.
+   * El subdominio local usa guiones (tienda-sol.localhost), pero el backend
+   * identifica tenants con guion bajo (tienda_sol).
+   */
+  getCurrentTenantHeader(): string | null {
+    const tenant = this.getCurrentTenant();
+    const storedTenant = localStorage.getItem('tenant_schema');
+    return tenant ? tenant.replace(/-/g, '_') : storedTenant;
+  }
+
+  /**
+   * Clave estable para separar datos locales por tenant.
+   */
+  getCurrentTenantStorageKey(): string {
+    return this.getCurrentTenantHeader() || 'localhost';
+  }
+
+  /**
    * Cambiar URL base dinámicamente (si es necesario)
    */
   setApiBaseUrl(url: string): void {

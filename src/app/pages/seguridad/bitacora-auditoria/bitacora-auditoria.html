@@ -63,7 +63,7 @@
           <td mat-cell *matCellDef="let element">{{ getHora(element) }}</td>
         </ng-container>
 
-        <ng-container matColumnDef="usuario">
+        <ng-container matColumnDef="usuario_username">
           <th mat-header-cell *matHeaderCellDef>Usuario</th>
           <td mat-cell *matCellDef="let element">{{ getUsuario(element) }}</td>
         </ng-container>
@@ -80,16 +80,16 @@
           <td mat-cell *matCellDef="let element">{{ getEntidad(element) }}</td>
         </ng-container>
 
+        <ng-container matColumnDef="ruta">
+          <th mat-header-cell *matHeaderCellDef>Ruta</th>
+          <td mat-cell *matCellDef="let element" class="ruta-cell">{{ element.ruta || '-' }}</td>
+        </ng-container>
+
         <ng-container matColumnDef="metodo">
           <th mat-header-cell *matHeaderCellDef>Metodo</th>
           <td mat-cell *matCellDef="let element">
             <mat-chip selected>{{ element.metodo || '-' }}</mat-chip>
           </td>
-        </ng-container>
-
-        <ng-container matColumnDef="ruta">
-          <th mat-header-cell *matHeaderCellDef>Ruta</th>
-          <td mat-cell *matCellDef="let element" class="ruta-cell">{{ element.ruta || '-' }}</td>
         </ng-container>
 
         <ng-container matColumnDef="estado_http">

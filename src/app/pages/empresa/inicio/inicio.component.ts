@@ -113,6 +113,11 @@ export class EmpresaInicioComponent implements OnInit {
         baseDomain = 'localhost';
       }
 
+      localStorage.removeItem('access');
+      localStorage.removeItem('refresh');
+      localStorage.removeItem('tenant_schema');
+      localStorage.removeItem('username');
+
       window.location.href = `${protocol}//${subdominio}.${baseDomain}${port}/login`;
     });
   }
