@@ -9,7 +9,7 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { HttpClient } from '@angular/common/http';
@@ -29,7 +29,7 @@ import { CancelarDialogComponent } from './cancelar-dialog/cancelar-dialog.compo
     CommonModule,
     MatCardModule, MatButtonModule, MatIconModule, MatTableModule,
     MatPaginatorModule, MatProgressSpinnerModule, MatSnackBarModule,
-    MatTooltipModule, MatSlideToggleModule, MatDividerModule, MatDialogModule
+    MatTooltipModule, MatCheckboxModule, MatDividerModule, MatDialogModule
   ],
   templateUrl: './suscripcion.component.html',
   styleUrl: './suscripcion.component.scss'

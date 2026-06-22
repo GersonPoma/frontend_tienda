@@ -88,11 +88,11 @@
                 {{ suscripcion()!.auto_renovar ? 'Se renueva automáticamente al vencer' : 'Sin renovación automática' }}
               </span>
             </div>
-            <mat-slide-toggle
+            <mat-checkbox
               [checked]="suscripcion()!.auto_renovar"
               (change)="toggleAutoRenovar($event.checked)"
               color="primary">
-            </mat-slide-toggle>
+            </mat-checkbox>
           </div>
 
           <div class="acciones">
