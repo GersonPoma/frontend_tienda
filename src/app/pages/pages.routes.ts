@@ -69,4 +69,29 @@ export const PagesRoutes: Routes = [
     loadChildren: () =>
       import('./ia/ia.routes').then((m) => m.IaRoutes),
   },
+  {
+    path: 'suscripcion',
+    loadComponent: () =>
+      import('./empresa/suscripcion/suscripcion.component').then((m) => m.SuscripcionComponent),
+    data: {
+      title: 'Mi Suscripción',
+      urls: [
+        { title: 'Dashboard', url: '/' },
+        { title: 'Mi Suscripción' }
+      ]
+    }
+  },
+  {
+    path: 'suscripcion/cambiar-plan',
+    loadComponent: () =>
+      import('./empresa/suscripcion/cambiar-plan/cambiar-plan.component').then((m) => m.CambiarPlanComponent),
+    data: {
+      title: 'Cambiar Plan',
+      urls: [
+        { title: 'Dashboard', url: '/' },
+        { title: 'Mi Suscripción', url: '/suscripcion' },
+        { title: 'Cambiar Plan' }
+      ]
+    }
+  },
 ];

@@ -24,3 +24,12 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   color: #ffe0b2 !important;
   font-weight: 600;
 }
+
+.dialog-acciones .mat-mdc-dialog-content {
+  overflow: visible !important;
+  padding-bottom: 0 !important;
+}
+.dialog-acciones .mat-mdc-dialog-actions {
+  padding-top: 16px !important;
+  border-top: 1px solid #f0f0f0;
+}

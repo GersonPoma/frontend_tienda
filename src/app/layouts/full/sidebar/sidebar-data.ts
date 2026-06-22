@@ -140,6 +140,11 @@ export const navItems: NavItem[] = [
     iconName: 'solar:settings-line-duotone',
     route: '/configuracion',
   },
+  {
+    displayName: 'Suscripción',
+    iconName: 'solar:card-recive-line-duotone',
+    route: '/suscripcion',
+  },
   // {
   //   navCap: 'Home',
   // },
