@@ -48,22 +48,29 @@
       <mat-error *ngIf="form.get('password')?.hasError('required')">
         La contraseña es requerida
       </mat-error>
-      <mat-error *ngIf="form.get('password')?.hasError('minlength')">
-        Mínimo 8 caracteres
-      </mat-error>
-      <mat-error *ngIf="form.get('password')?.hasError('noLowercase')">
-        Debe tener al menos 1 minúscula
-      </mat-error>
-      <mat-error *ngIf="form.get('password')?.hasError('noUppercase')">
-        Debe tener al menos 1 mayúscula
-      </mat-error>
-      <mat-error *ngIf="form.get('password')?.hasError('noNumber')">
-        Debe tener al menos 1 número
-      </mat-error>
-      <mat-error *ngIf="form.get('password')?.hasError('noSymbol')">
-        Debe tener al menos 1 símbolo
-      </mat-error>
     </mat-form-field>
+    <div class="pwd-req-list" *ngIf="form.get('password')?.value">
+      <div class="req-item" [class.req-ok]="passwordReqs.length">
+        <mat-icon>{{ passwordReqs.length ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+        <span>Mínimo 8 caracteres</span>
+      </div>
+      <div class="req-item" [class.req-ok]="passwordReqs.lowercase">
+        <mat-icon>{{ passwordReqs.lowercase ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+        <span>1 letra minúscula</span>
+      </div>
+      <div class="req-item" [class.req-ok]="passwordReqs.uppercase">
+        <mat-icon>{{ passwordReqs.uppercase ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+        <span>1 letra mayúscula</span>
+      </div>
+      <div class="req-item" [class.req-ok]="passwordReqs.number">
+        <mat-icon>{{ passwordReqs.number ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+        <span>1 número</span>
+      </div>
+      <div class="req-item" [class.req-ok]="passwordReqs.symbol">
+        <mat-icon>{{ passwordReqs.symbol ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+        <span>1 símbolo (@, #, !, etc.)</span>
+      </div>
+    </div>
 
     <!-- Roles/Grupo Disponibles -->
     <div style="margin-top: 16px;">

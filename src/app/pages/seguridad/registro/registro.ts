@@ -96,6 +96,17 @@ export class RegistroComponent implements OnDestroy {
     return this.form.controls;
   }
 
+  get passwordReqs() {
+    const v = this.f['password']?.value || '';
+    return {
+      length:    v.length >= 8,
+      lowercase: /[a-z]/.test(v),
+      uppercase: /[A-Z]/.test(v),
+      number:    /[0-9]/.test(v),
+      symbol:    /[^a-zA-Z0-9]/.test(v),
+    };
+  }
+
   togglePasswordVisibility(): void {
     this.hidePassword = !this.hidePassword;
   }

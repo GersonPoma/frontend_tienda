@@ -109,6 +109,17 @@ export class CrearUsuarioComponent implements OnInit, OnDestroy {
     }
   }
 
+  get passwordReqs() {
+    const v = this.form.get('password')?.value || '';
+    return {
+      length:    v.length >= 8,
+      lowercase: /[a-z]/.test(v),
+      uppercase: /[A-Z]/.test(v),
+      number:    /[0-9]/.test(v),
+      symbol:    /[^a-zA-Z0-9]/.test(v),
+    };
+  }
+
   ngOnInit(): void {
     this.cargarRoles();
   }
