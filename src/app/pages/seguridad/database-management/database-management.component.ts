@@ -9,6 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Subject, takeUntil } from 'rxjs';
 import { ConfigService } from '../../../services/config.service';
+import { PermisosService } from '../../../services/permisos.service';
 
 @Component({
   selector: 'app-database-management',
@@ -31,11 +32,15 @@ export class DatabaseManagementComponent implements OnDestroy {
   private http = inject(HttpClient);
   private config = inject(ConfigService);
   private snackBar = inject(MatSnackBar);
+  private permisosService = inject(PermisosService);
   private destroy$ = new Subject<void>();
 
   descargando = false;
   restaurando = false;
   archivoSeleccionado: File | null = null;
+
+  puedeDescargarBackup = this.permisosService.tiene(PermisosService.SEGURIDAD_ADD_BACKUP);
+  puedeRestaurar = this.permisosService.tiene(PermisosService.SEGURIDAD_ADD_RESTORE);
 
   descargarBackup(): void {
     this.descargando = true;

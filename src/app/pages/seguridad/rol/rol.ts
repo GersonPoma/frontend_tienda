@@ -40,7 +40,7 @@ import { EliminarRolComponent } from './eliminar-rol/eliminar-rol';
   styleUrl: './rol.scss',
 })
 export class RolComponent implements OnInit, OnDestroy {
-  displayedColumns: string[] = ['id', 'name', 'permisos', 'acciones'];
+  displayedColumns: string[] = ['id', 'name', 'permisos'];
   dataSource: Rol[] = [];
 
   totalItems = 0;
@@ -74,6 +74,9 @@ export class RolComponent implements OnInit, OnDestroy {
     this.puedeCrear = this.permisosService.puedeCrearRol();
     this.puedeEditar = this.permisosService.puedeEditarRol();
     this.puedeEliminar = this.permisosService.puedeEliminarRol();
+    if (this.puedeEditar || this.puedeEliminar) {
+      this.displayedColumns = ['id', 'name', 'permisos', 'acciones'];
+    }
   }
 
   ngOnDestroy(): void {

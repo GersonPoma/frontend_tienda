@@ -13,7 +13,7 @@
       <p class="subtitle">Alertas generadas automáticamente por el sistema de IA</p>
     </div>
     <div class="header-actions">
-      @if (noLeidas() > 0) {
+      @if (puedeEditar && noLeidas() > 0) {
         <button mat-stroked-button (click)="marcarTodasLeidas()">
           <mat-icon>done_all</mat-icon>
           Marcar todas como leídas

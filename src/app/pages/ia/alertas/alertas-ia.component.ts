@@ -16,6 +16,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatChipsModule } from '@angular/material/chips';
 import { ApiService } from '../../../services/api.service';
 import { ConfigService } from '../../../services/config.service';
+import { PermisosService } from '../../../services/permisos.service';
 import { AlertasRefreshService } from '../../../services/alertas-refresh.service';
 import { AlertaIa, AlertaTipo } from '../../../models/ia/alerta-ia.model';
 import { Pagination } from '../../../models/pagination.model';
@@ -58,16 +59,23 @@ export class AlertasIaComponent implements OnInit, OnDestroy {
 
   noLeidas = computed(() => this.alertas().filter(a => !a.leida).length);
 
-  columnas = ['tipo', 'producto', 'categoria', 'sku', 'stock_actual', 'limite_minimo', 'deficit', 'fecha', 'acciones'];
+  columnas: string[] = ['tipo', 'producto', 'categoria', 'sku', 'stock_actual', 'limite_minimo', 'deficit', 'fecha'];
+
+  puedeEditar = false;
 
   constructor(
     private apiService: ApiService,
     private http: HttpClient,
     private configService: ConfigService,
+    private permisosService: PermisosService,
     private alertasRefreshService: AlertasRefreshService,
     private snackBar: MatSnackBar
   ) {
     this.alertasUrl = this.configService.getApiUrl('ia/alertas');
+    this.puedeEditar = this.permisosService.tiene(PermisosService.IA_CHANGE_ALERTA);
+    if (this.puedeEditar) {
+      this.columnas = [...this.columnas, 'acciones'];
+    }
   }
 
   ngOnInit(): void {

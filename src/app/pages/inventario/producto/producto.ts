@@ -39,7 +39,7 @@ import { EliminarProductoComponent } from './eliminar-producto/eliminar-producto
   styleUrl: './producto.scss',
 })
 export class ProductoComponent implements OnInit, OnDestroy {
-  displayedColumns: string[] = ['id', 'nombre', 'categoria_nombre', 'marca_nombre', 'imagenes', 'acciones'];
+  displayedColumns: string[] = ['id', 'nombre', 'categoria_nombre', 'marca_nombre', 'imagenes'];
   dataSource: Producto[] = [];
 
   totalItems = 0;
@@ -47,6 +47,7 @@ export class ProductoComponent implements OnInit, OnDestroy {
   currentPage = 0;
   isLoading = false;
 
+  puedeVerDetalle = false;
   puedeCrear = false;
   puedeEditar = false;
   puedeEliminar = false;
@@ -71,9 +72,13 @@ export class ProductoComponent implements OnInit, OnDestroy {
   }
 
   private verificarPermisos(): void {
+    this.puedeVerDetalle = this.permisosService.tiene(PermisosService.INVENTARIO_VIEW_PRODUCTO_DETALLE);
     this.puedeCrear = this.permisosService.puedeCrearProducto();
     this.puedeEditar = this.permisosService.puedeEditarProducto();
     this.puedeEliminar = this.permisosService.puedeEliminarProducto();
+    if (this.puedeVerDetalle || this.puedeEditar || this.puedeEliminar) {
+      this.displayedColumns = ['id', 'nombre', 'categoria_nombre', 'marca_nombre', 'imagenes', 'acciones'];
+    }
   }
 
   ngOnDestroy(): void {

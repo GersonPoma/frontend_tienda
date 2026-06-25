@@ -9,8 +9,12 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 })
 export class PermisosService {
+  // INVENTARIO - CATÁLOGO
+  static readonly INVENTARIO_VIEW_CATALOGO = 'inventario.view_catalogo';
+
   // INVENTARIO - PRODUCTO
   static readonly INVENTARIO_VIEW_PRODUCTO = 'inventario.view_producto';
+  static readonly INVENTARIO_VIEW_PRODUCTO_DETALLE = 'inventario.view_producto_detalle';
   static readonly INVENTARIO_ADD_PRODUCTO = 'inventario.add_producto';
   static readonly INVENTARIO_CHANGE_PRODUCTO = 'inventario.change_producto';
   static readonly INVENTARIO_DELETE_PRODUCTO = 'inventario.delete_producto';
@@ -57,8 +61,39 @@ export class PermisosService {
   static readonly SEGURIDAD_CHANGE_USUARIO = 'seguridad.change_usuario';
   static readonly SEGURIDAD_DELETE_USUARIO = 'seguridad.delete_usuario';
 
+  // SEGURIDAD - DASHBOARD
+  static readonly SEGURIDAD_VIEW_DASHBOARD = 'seguridad.view_dashboard';
+
   // SEGURIDAD - BITACORA
   static readonly SEGURIDAD_VIEW_BITACORA = 'seguridad.view_bitacora';
+  static readonly SEGURIDAD_VIEW_BITACORA_AUDITORIA = 'seguridad.view_bitacoraauditoria';
+
+  // SEGURIDAD - BACKUP / RESTORE
+  static readonly SEGURIDAD_VIEW_BACKUP = 'seguridad.view_backup';
+  static readonly SEGURIDAD_ADD_BACKUP = 'seguridad.add_backup';
+  static readonly SEGURIDAD_ADD_RESTORE = 'seguridad.add_restore';
+
+  // SEGURIDAD - REPORTE
+  static readonly SEGURIDAD_ADD_REPORTE = 'seguridad.add_reporte';
+
+  // SEGURIDAD - PREDICCIÓN
+  static readonly SEGURIDAD_ADD_PREDICCION = 'seguridad.add_prediccion';
+
+  // NOTIFICACIONES
+  static readonly NOTIFICACIONES_VIEW_NOTIFICACION = 'notificaciones.view_notificacion';
+
+  // SEGURIDAD - EMPRESA
+  static readonly SEGURIDAD_CHANGE_EMPRESA = 'seguridad.change_empresa';
+
+  // SEGURIDAD - SUSCRIPCIÓN
+  static readonly SEGURIDAD_VIEW_MI_SUSCRIPCION = 'seguridad.view_mi_suscripcion';
+  static readonly SEGURIDAD_CHANGE_MI_SUSCRIPCION = 'seguridad.change_mi_suscripcion';
+
+  // IA - ALERTA
+  static readonly IA_VIEW_ALERTA = 'ia.view_alerta';
+  static readonly IA_ADD_ALERTA = 'ia.add_alerta';
+  static readonly IA_CHANGE_ALERTA = 'ia.change_alerta';
+  static readonly IA_DELETE_ALERTA = 'ia.delete_alerta';
 
   // AUTH - GRUPO (ROL)
   static readonly AUTH_VIEW_GROUP = 'auth.view_group';

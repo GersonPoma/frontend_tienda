@@ -8,7 +8,7 @@
       </h1>
     </div>
     <div class="header-actions">
-      <button mat-stroked-button (click)="irCambiarPlan()" [disabled]="!suscripcion()">
+      <button *ngIf="puedeCambiar" mat-stroked-button (click)="irCambiarPlan()" [disabled]="!suscripcion()">
         <mat-icon>swap_horiz</mat-icon>
         Cambiar plan
       </button>
@@ -91,18 +91,19 @@
             <mat-checkbox
               [checked]="suscripcion()!.auto_renovar"
               (change)="toggleAutoRenovar($event.checked)"
+              [disabled]="!puedeCambiar"
               color="primary">
             </mat-checkbox>
           </div>
 
           <div class="acciones">
-            @if (suscripcion()!.estado === 'activa' || suscripcion()!.estado === 'trial' || suscripcion()!.estado === 'expirada') {
+            @if (puedeCambiar && (suscripcion()!.estado === 'activa' || suscripcion()!.estado === 'trial' || suscripcion()!.estado === 'expirada')) {
               <button mat-raised-button color="primary" (click)="abrirRenovar()">
                 <mat-icon>autorenew</mat-icon>
                 Renovar ahora
               </button>
             }
-            @if (suscripcion()!.estado === 'activa' || suscripcion()!.estado === 'trial') {
+            @if (puedeCambiar && (suscripcion()!.estado === 'activa' || suscripcion()!.estado === 'trial')) {
               <button mat-stroked-button color="warn" (click)="abrirCancelar()">
                 <mat-icon>cancel</mat-icon>
                 Cancelar

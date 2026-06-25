@@ -37,7 +37,7 @@ import { EliminarMarcaComponent } from './eliminar-marca/eliminar-marca';
   styleUrl: './marca.scss',
 })
 export class MarcaComponent implements OnInit, OnDestroy {
-  displayedColumns: string[] = ['id', 'nombre', 'acciones'];
+  displayedColumns: string[] = ['id', 'nombre'];
   dataSource: Marca[] = [];
 
   totalItems = 0;
@@ -71,6 +71,9 @@ export class MarcaComponent implements OnInit, OnDestroy {
     this.puedeCrear = this.permisosService.puedeCrearMarca();
     this.puedeEditar = this.permisosService.puedeEditarMarca();
     this.puedeEliminar = this.permisosService.puedeEliminarMarca();
+    if (this.puedeEditar || this.puedeEliminar) {
+      this.displayedColumns = ['id', 'nombre', 'acciones'];
+    }
   }
 
   ngOnDestroy(): void {

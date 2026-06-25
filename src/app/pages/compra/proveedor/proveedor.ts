@@ -37,7 +37,7 @@ import { EliminarProveedorComponent } from './eliminar-proveedor/eliminar-provee
   styleUrls: ['./proveedor.scss']
 })
 export class ProveedorComponent implements OnInit, OnDestroy {
-  displayedColumns: string[] = ['id', 'nombre', 'direccion', 'telefono', 'acciones'];
+  displayedColumns: string[] = ['id', 'nombre', 'direccion', 'telefono'];
   dataSource: Proveedor[] = [];
   totalItems = 0;
   pageSize = 10;
@@ -82,6 +82,9 @@ export class ProveedorComponent implements OnInit, OnDestroy {
     this.puedeCrear = this.permisosService.puedeCrearProveedor();
     this.puedeEditar = this.permisosService.puedeEditarProveedor();
     this.puedeEliminar = this.permisosService.puedeEliminarProveedor();
+    if (this.puedeEditar || this.puedeEliminar) {
+      this.displayedColumns = ['id', 'nombre', 'direccion', 'telefono', 'acciones'];
+    }
   }
 
   loadProveedores(): void {

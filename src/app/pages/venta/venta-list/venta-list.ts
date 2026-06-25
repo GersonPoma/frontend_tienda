@@ -37,7 +37,7 @@ import { EliminarVentaComponent } from '../eliminar-venta/eliminar-venta';
   templateUrl: './venta-list.html',
 })
 export class VentaListComponent implements OnInit, OnDestroy {
-  displayedColumns: string[] = ['id', 'fecha', 'tipo', 'estado', 'usuario', 'precio_total', 'acciones'];
+  displayedColumns: string[] = ['id', 'fecha', 'tipo', 'estado', 'usuario', 'precio_total'];
   dataSource: Venta[] = [];
   totalItems = 0;
   pageSize = 10;
@@ -76,6 +76,9 @@ export class VentaListComponent implements OnInit, OnDestroy {
     this.puedeVer = this.permisosService.puedeVerVenta();
     this.puedeCrear = this.permisosService.puedeCrearVenta();
     this.puedeEliminar = this.permisosService.puedeEliminarVenta();
+    if (this.puedeVer) {
+      this.displayedColumns = ['id', 'fecha', 'tipo', 'estado', 'usuario', 'precio_total', 'acciones'];
+    }
   }
 
   loadVentas(): void {

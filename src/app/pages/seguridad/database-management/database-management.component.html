@@ -24,6 +24,7 @@
 
         <div class="section-action">
           <button
+            *ngIf="puedeDescargarBackup"
             mat-raised-button
             color="primary"
             [disabled]="descargando"
@@ -63,6 +64,7 @@
 
           <!-- Botón para abrir el selector -->
           <button
+            *ngIf="puedeRestaurar"
             mat-stroked-button
             color="warn"
             [disabled]="restaurando"

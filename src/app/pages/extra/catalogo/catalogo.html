@@ -28,7 +28,7 @@
 
   <!-- Grid de Productos -->
   <div class="products-grid" *ngIf="!cargando && productos.length > 0">
-    <mat-card class="product-card" *ngFor="let prod of productos" (click)="verDetalles(prod.id)">
+    <mat-card class="product-card" *ngFor="let prod of productos" (click)="verDetalles(prod.id)" [style.cursor]="puedeVerDetalle ? 'pointer' : 'default'">
       <div class="image-wrapper">
         <img [src]="prod.imagen_principal || 'assets/images/products/placeholder.jpg'" [alt]="prod.nombre"
           class="product-image">
@@ -58,7 +58,7 @@
             <span class="f-s-12 text-muted">Desde</span>
             <div class="f-w-700 f-s-18">{{ prod.precio_minimo | currency:'BOB ':'symbol':'1.0-0' }}</div>
           </div>
-          <button mat-mini-fab color="primary" matTooltip="Ver detalles">
+          <button *ngIf="puedeVerDetalle" mat-mini-fab color="primary" matTooltip="Ver detalles">
             <mat-icon>visibility</mat-icon>
           </button>
         </div>

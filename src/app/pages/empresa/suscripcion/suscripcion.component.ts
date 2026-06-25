@@ -15,6 +15,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { HttpClient } from '@angular/common/http';
 import { ApiService } from '../../../services/api.service';
 import { ConfigService } from '../../../services/config.service';
+import { PermisosService } from '../../../services/permisos.service';
 import { Plan } from '../../../models/empresa/plan.model';
 import { Suscripcion, SuscripcionCambio } from '../../../models/empresa/suscripcion.model';
 import { Pagination } from '../../../models/pagination.model';
@@ -70,14 +71,18 @@ export class SuscripcionComponent implements OnInit, OnDestroy {
     return map[estado] ?? map['expirada'];
   });
 
+  puedeCambiar = false;
+
   constructor(
     private apiService: ApiService,
     private http: HttpClient,
     private configService: ConfigService,
+    private permisosService: PermisosService,
     private router: Router,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
   ) {
+    this.puedeCambiar = this.permisosService.tiene(PermisosService.SEGURIDAD_CHANGE_MI_SUSCRIPCION);
     this.suscripcionesUrl = this.configService.getApiUrl('suscripciones');
     this.cambiosUrl = this.configService.getApiUrl('suscripcion-cambios');
   }

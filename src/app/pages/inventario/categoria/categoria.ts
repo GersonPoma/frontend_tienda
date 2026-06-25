@@ -39,7 +39,7 @@ import { MarcaComponent } from '../marca/marca';
   styleUrl: './categoria.scss',
 })
 export class CategoriaComponent implements OnInit, OnDestroy {
-  displayedColumns: string[] = ['id', 'nombre', 'acciones'];
+  displayedColumns: string[] = ['id', 'nombre'];
   dataSource: Categoria[] = [];
 
   totalItems = 0;
@@ -47,9 +47,12 @@ export class CategoriaComponent implements OnInit, OnDestroy {
   currentPage = 0;
   isLoading = false;
 
+  puedeVerCategoria = false;
   puedeCrear = false;
   puedeEditar = false;
   puedeEliminar = false;
+
+  puedeVerMarca = false;
 
   private apiUrl: string;
   private destroy$ = new Subject<void>();
@@ -70,9 +73,14 @@ export class CategoriaComponent implements OnInit, OnDestroy {
   }
 
   private verificarPermisos(): void {
+    this.puedeVerCategoria = this.permisosService.puedeVerCategoria();
     this.puedeCrear = this.permisosService.puedeCrearCategoria();
     this.puedeEditar = this.permisosService.puedeEditarCategoria();
     this.puedeEliminar = this.permisosService.puedeEliminarCategoria();
+    this.puedeVerMarca = this.permisosService.puedeVerMarca();
+    if (this.puedeEditar || this.puedeEliminar) {
+      this.displayedColumns = ['id', 'nombre', 'acciones'];
+    }
   }  
 
   ngOnDestroy(): void {

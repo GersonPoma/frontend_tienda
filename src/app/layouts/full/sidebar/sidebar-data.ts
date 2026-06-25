@@ -6,13 +6,15 @@ export const navItems: NavItem[] = [
     displayName: 'Dashboard',
     iconName: 'solar:pie-chart-2-line-duotone',
     route: '/',
+    permiso: PermisosService.SEGURIDAD_VIEW_DASHBOARD,
   },
   {
     navCap: 'Seguridad',
     permiso: [
       PermisosService.SEGURIDAD_VIEW_USUARIO,
       PermisosService.AUTH_VIEW_GROUP,
-      PermisosService.SEGURIDAD_VIEW_BITACORA,
+      PermisosService.SEGURIDAD_VIEW_BITACORA_AUDITORIA,
+      PermisosService.SEGURIDAD_VIEW_BACKUP,
     ],
   },
 
@@ -32,26 +34,20 @@ export const navItems: NavItem[] = [
     displayName: 'Bitacora',
     iconName: 'solar:history-line-duotone',
     route: '/seguridad/bitacora',
-    permiso: [
-      PermisosService.SEGURIDAD_VIEW_BITACORA,
-      PermisosService.SEGURIDAD_VIEW_USUARIO,
-      PermisosService.AUTH_VIEW_GROUP,
-      PermisosService.AUTH_VIEW_PERMISSION,
-    ]
+    permiso: PermisosService.SEGURIDAD_VIEW_BITACORA_AUDITORIA,
   },
   {
     displayName: 'Base de Datos',
     iconName: 'solar:database-line-duotone',
     route: '/seguridad/base-de-datos',
-    permiso: [
-      PermisosService.SEGURIDAD_VIEW_USUARIO,
-      PermisosService.AUTH_VIEW_GROUP,
-    ]
+    permiso: PermisosService.SEGURIDAD_VIEW_BACKUP,
   },
   {
     navCap: 'Inventario',
     permiso: [
+      PermisosService.INVENTARIO_VIEW_CATALOGO,
       PermisosService.INVENTARIO_VIEW_CATEGORIA,
+      PermisosService.INVENTARIO_VIEW_MARCA,
       PermisosService.INVENTARIO_VIEW_PRODUCTO,
     ],
   },
@@ -59,13 +55,16 @@ export const navItems: NavItem[] = [
     displayName: 'Catálogo',
     iconName: 'solar:widget-2-line-duotone',
     route: '/extra/catalogo',
+    permiso: PermisosService.INVENTARIO_VIEW_CATALOGO,
   },
   {
     displayName: 'Categorías',
-
     iconName: 'solar:tag-line-duotone',
     route: '/inventario/categorias',
-    permiso: PermisosService.INVENTARIO_VIEW_CATEGORIA
+    permiso: [
+      PermisosService.INVENTARIO_VIEW_CATEGORIA,
+      PermisosService.INVENTARIO_VIEW_MARCA,
+    ],
   },
   {
     displayName: 'Productos',
@@ -77,6 +76,7 @@ export const navItems: NavItem[] = [
     navCap: 'Compras',
     permiso: [
       PermisosService.COMPRA_VIEW_PROVEEDOR,
+      PermisosService.COMPRA_VIEW_COMPRA,
     ],
   },
   {
@@ -105,45 +105,61 @@ export const navItems: NavItem[] = [
   },
   {
     navCap: 'Marketing',
+    permiso: PermisosService.NOTIFICACIONES_VIEW_NOTIFICACION,
   },
   {
     displayName: 'Notificaciones',
     iconName: 'solar:bell-bing-line-duotone',
     route: '/notificaciones',
+    permiso: PermisosService.NOTIFICACIONES_VIEW_NOTIFICACION,
   },
   {
     navCap: 'Reportes',
+    permiso: PermisosService.SEGURIDAD_ADD_REPORTE,
   },
   {
     displayName: 'Reportes',
     iconName: 'solar:chart-square-line-duotone',
+    permiso: PermisosService.SEGURIDAD_ADD_REPORTE,
     route: '/reportes',
   },
   {
     navCap: 'Inteligencia Artificial',
+    permiso: [
+      PermisosService.SEGURIDAD_ADD_PREDICCION,
+      PermisosService.IA_VIEW_ALERTA,
+    ],
   },
   {
     displayName: 'Predicción',
     iconName: 'solar:graph-line-duotone',
     route: '/ia/prediccion',
+    permiso: PermisosService.SEGURIDAD_ADD_PREDICCION,
   },
   {
     displayName: 'Alertas IA',
     iconName: 'solar:bell-bing-line-duotone',
     route: '/ia/alertas',
+    permiso: PermisosService.IA_VIEW_ALERTA,
   },
   {
     navCap: 'Configuración',
+    permiso: [
+      PermisosService.SEGURIDAD_CHANGE_EMPRESA,
+      PermisosService.SEGURIDAD_VIEW_MI_SUSCRIPCION,
+    ],
   },
   {
     displayName: 'Mi Empresa',
     iconName: 'solar:settings-line-duotone',
     route: '/configuracion',
+    permiso: PermisosService.SEGURIDAD_CHANGE_EMPRESA,
   },
   {
     displayName: 'Suscripción',
     iconName: 'solar:card-recive-line-duotone',
     route: '/suscripcion',
+    permiso: PermisosService.SEGURIDAD_VIEW_MI_SUSCRIPCION,
   },
   // {
   //   navCap: 'Home',

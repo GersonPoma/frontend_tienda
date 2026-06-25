@@ -54,6 +54,7 @@
           <th mat-header-cell *matHeaderCellDef>Acciones</th>
           <td mat-cell *matCellDef="let element">
             <button
+              *ngIf="puedeVerDetalle"
               mat-icon-button
               matTooltip="Ver Detalles"
               (click)="verDetalles(element)"

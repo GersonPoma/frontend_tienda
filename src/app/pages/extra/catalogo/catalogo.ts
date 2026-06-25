@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from 'src/app/services/api.service';
 import { ConfigService } from 'src/app/services/config.service';
 import { FavoritosService } from 'src/app/services/favoritos.service';
+import { PermisosService } from 'src/app/services/permisos.service';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MaterialModule } from 'src/app/material.module';
@@ -71,13 +72,17 @@ export class CatalogoComponent implements OnInit, AfterViewInit, OnDestroy {
   private observer!: IntersectionObserver;
   private searchSubject = new Subject<string>();
 
+  puedeVerDetalle = false;
+
   constructor(
     private apiService: ApiService,
     private configService: ConfigService,
     private favoritosService: FavoritosService,
     private snackBar: MatSnackBar,
-    private router: Router
+    private router: Router,
+    private permisosService: PermisosService
   ) {
+    this.puedeVerDetalle = this.permisosService.tiene(PermisosService.INVENTARIO_VIEW_PRODUCTO_DETALLE);
     this.searchSubject.pipe(
       debounceTime(300),
       distinctUntilChanged()
@@ -177,6 +182,7 @@ export class CatalogoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   verDetalles(id: number): void {
+    if (!this.puedeVerDetalle) return;
     this.router.navigate(['/inventario/productos', id]);
   }
 
