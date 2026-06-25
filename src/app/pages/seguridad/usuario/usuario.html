@@ -72,7 +72,8 @@
               mat-icon-button
               matTooltip="Editar"
               (click)="editarUsuario(element)"
-              color="primary">
+              color="primary"
+              [disabled]="element.is_superuser">
               <mat-icon>edit</mat-icon>
             </button>
             <button
@@ -80,14 +81,15 @@
               mat-icon-button
               matTooltip="Eliminar"
               (click)="eliminarUsuario(element)"
-              color="warn">
+              color="warn"
+              [disabled]="element.is_superuser">
               <mat-icon>delete</mat-icon>
             </button>
           </td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.superuser-row]="row.is_superuser"></tr>
       </table>
     </div>
 
