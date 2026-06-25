@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, Inject, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormArray, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatListModule } from '@angular/material/list';
+import { MatListModule, MatSelectionListChange } from '@angular/material/list';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { Subject } from 'rxjs';
@@ -40,12 +40,21 @@ import { CrearRol } from '../../../../models/seguridad/rol.model';
 export class CrearRolComponent implements OnInit, OnDestroy {
   form: FormGroup;
   permisos: Permiso[] = [];
-  permisosSeleccionadosPorDefecto: number[] = [];
+  seleccionados = new Set<number>();
+  busqueda = '';
   isLoading = false;
   isSaving = false;
   isEditMode = false;
   private destroy$ = new Subject<void>();
   @ViewChild('permisosList') permisosList: any;
+
+  get permisosFiltrados(): Permiso[] {
+    const term = this.busqueda.toLowerCase().trim();
+    if (!term) return this.permisos;
+    return this.permisos.filter(p =>
+      p.nombre?.toLowerCase().includes(term) || p.codename?.toLowerCase().includes(term)
+    );
+  }
 
   constructor(
     private formBuilder: FormBuilder,
@@ -61,7 +70,7 @@ export class CrearRolComponent implements OnInit, OnDestroy {
     });
     // Guardar IDs de permisos seleccionados por defecto si es edición
     if (this.isEditMode && data?.rol?.permisos) {
-      this.permisosSeleccionadosPorDefecto = data.rol.permisos.map((p: any) => p.id);
+      this.seleccionados = new Set(data.rol.permisos.map((p: any) => p.id));
     }
   }
 
@@ -100,6 +109,16 @@ export class CrearRolComponent implements OnInit, OnDestroy {
   /**
    * Guardar rol (crear o editar)
    */
+  onSelectionChange(event: MatSelectionListChange): void {
+    event.options.forEach(option => {
+      if (option.selected) {
+        this.seleccionados.add(option.value);
+      } else {
+        this.seleccionados.delete(option.value);
+      }
+    });
+  }
+
   guardar(): void {
     if (this.form.invalid) {
       this.snackBar.open('Por favor completa todos los campos', 'Cerrar', { duration: 3000 });
@@ -107,8 +126,7 @@ export class CrearRolComponent implements OnInit, OnDestroy {
     }
 
     this.isSaving = true;
-    // Obtener IDs de los permisos seleccionados
-    const permisosSeleccionados = this.permisosList.selectedOptions.selected.map((option: any) => option.value);
+    const permisosSeleccionados = Array.from(this.seleccionados);
 
     const datosRol: CrearRol = {
       name: this.form.value.nombre,
