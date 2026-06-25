@@ -60,7 +60,11 @@
                 <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
               </button>
               <mat-error *ngIf="f['password']?.hasError('required')">La contraseña es requerida</mat-error>
-              <mat-error *ngIf="f['password']?.hasError('minlength')">Mínimo 6 caracteres</mat-error>
+              <mat-error *ngIf="f['password']?.hasError('minlength')">Mínimo 8 caracteres</mat-error>
+              <mat-error *ngIf="f['password']?.hasError('noLowercase')">Debe tener al menos 1 minúscula</mat-error>
+              <mat-error *ngIf="f['password']?.hasError('noUppercase')">Debe tener al menos 1 mayúscula</mat-error>
+              <mat-error *ngIf="f['password']?.hasError('noNumber')">Debe tener al menos 1 número</mat-error>
+              <mat-error *ngIf="f['password']?.hasError('noSymbol')">Debe tener al menos 1 símbolo</mat-error>
             </mat-form-field>
 
             <mat-label class="mat-subtitle-2 f-s-14 f-w-600 m-b-12 d-block m-t-8">Confirmar Contraseña</mat-label>
@@ -70,7 +74,11 @@
                 <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
               </button>
               <mat-error *ngIf="f['confirmPassword']?.hasError('required')">Confirmar contraseña es requerido</mat-error>
-              <mat-error *ngIf="f['confirmPassword']?.hasError('minlength')">Mínimo 6 caracteres</mat-error>
+              <mat-error *ngIf="f['confirmPassword']?.hasError('minlength')">Mínimo 8 caracteres</mat-error>
+              <mat-error *ngIf="f['confirmPassword']?.hasError('noLowercase')">Debe tener al menos 1 minúscula</mat-error>
+              <mat-error *ngIf="f['confirmPassword']?.hasError('noUppercase')">Debe tener al menos 1 mayúscula</mat-error>
+              <mat-error *ngIf="f['confirmPassword']?.hasError('noNumber')">Debe tener al menos 1 número</mat-error>
+              <mat-error *ngIf="f['confirmPassword']?.hasError('noSymbol')">Debe tener al menos 1 símbolo</mat-error>
             </mat-form-field>
 
             <button

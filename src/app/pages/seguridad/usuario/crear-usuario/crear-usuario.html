@@ -51,6 +51,18 @@
       <mat-error *ngIf="form.get('password')?.hasError('minlength')">
         Mínimo 8 caracteres
       </mat-error>
+      <mat-error *ngIf="form.get('password')?.hasError('noLowercase')">
+        Debe tener al menos 1 minúscula
+      </mat-error>
+      <mat-error *ngIf="form.get('password')?.hasError('noUppercase')">
+        Debe tener al menos 1 mayúscula
+      </mat-error>
+      <mat-error *ngIf="form.get('password')?.hasError('noNumber')">
+        Debe tener al menos 1 número
+      </mat-error>
+      <mat-error *ngIf="form.get('password')?.hasError('noSymbol')">
+        Debe tener al menos 1 símbolo
+      </mat-error>
     </mat-form-field>
 
     <!-- Roles/Grupo Disponibles -->

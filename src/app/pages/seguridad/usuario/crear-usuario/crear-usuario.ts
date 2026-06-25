@@ -1,5 +1,17 @@
 import { Component, OnInit, OnDestroy, Inject, ViewChild, ChangeDetectorRef } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
+
+function passwordSegura(control: AbstractControl): ValidationErrors | null {
+  const v = control.value;
+  if (!v) return null;
+  const errors: ValidationErrors = {};
+  if (v.length < 8)             errors['minlength']   = true;
+  if (!/[a-z]/.test(v))         errors['noLowercase'] = true;
+  if (!/[A-Z]/.test(v))         errors['noUppercase'] = true;
+  if (!/[0-9]/.test(v))         errors['noNumber']    = true;
+  if (!/[^a-zA-Z0-9]/.test(v))  errors['noSymbol']    = true;
+  return Object.keys(errors).length ? errors : null;
+}
 import { CommonModule } from '@angular/common';
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -85,8 +97,8 @@ export class CrearUsuarioComponent implements OnInit, OnDestroy {
       password: [
         data?.usuario?.password || '',
         this.isEditMode
-          ? [Validators.minLength(8)]
-          : [Validators.required, Validators.minLength(8)]
+          ? [passwordSegura]
+          : [Validators.required, passwordSegura]
       ],
       grupo_id: ['', Validators.required]
     });

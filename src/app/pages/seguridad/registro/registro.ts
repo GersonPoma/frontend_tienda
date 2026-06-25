@@ -1,5 +1,17 @@
 import { Component, OnDestroy } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { FormGroup, FormControl, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+
+function passwordSegura(control: AbstractControl): ValidationErrors | null {
+  const v = control.value;
+  if (!v) return null;
+  const errors: ValidationErrors = {};
+  if (v.length < 8)          errors['minlength']   = true;
+  if (!/[a-z]/.test(v))      errors['noLowercase'] = true;
+  if (!/[A-Z]/.test(v))      errors['noUppercase'] = true;
+  if (!/[0-9]/.test(v))      errors['noNumber']    = true;
+  if (!/[^a-zA-Z0-9]/.test(v)) errors['noSymbol'] = true;
+  return Object.keys(errors).length ? errors : null;
+}
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -51,8 +63,8 @@ export class RegistroComponent implements OnDestroy {
     fecha_nacimiento: new FormControl<Date | null>(null, [Validators.required]),
     email: new FormControl('', [Validators.email]),
     username: new FormControl('', [Validators.required, Validators.minLength(3)]),
-    password: new FormControl('', [Validators.required, Validators.minLength(6)]),
-    confirmPassword: new FormControl('', [Validators.required, Validators.minLength(6)]),
+    password: new FormControl('', [Validators.required, passwordSegura]),
+    confirmPassword: new FormControl('', [Validators.required, passwordSegura]),
   });
 
   private destroy$ = new Subject<void>();
