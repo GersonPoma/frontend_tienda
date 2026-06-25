@@ -77,21 +77,7 @@ export class NotificacionesService {
   }
 
   async getVapidPublicKey(): Promise<Record<string, unknown>> {
-    const tenant = this.configService.getCurrentTenantHeader();
-    const headers: Record<string, string> = {
-      Accept: 'application/json',
-    };
-
-    if (tenant) {
-      headers['x-tenant'] = tenant;
-    }
-
-    try {
-      return await this.fetchVapidResponse('vapid-public-key/', headers);
-    } catch (error) {
-      console.warn('No se pudo obtener VAPID con vapid-public-key, probando vapid_public_key:', error);
-      return this.fetchVapidResponse('vapid_public_key/', headers);
-    }
+    return this.fetchVapidResponse('vapid-public-key/');
   }
 
   probar(payload: PruebaNotificacionPayload): Observable<unknown> {
@@ -106,29 +92,11 @@ export class NotificacionesService {
     return this.configService.getApiUrl(endpoint);
   }
 
-  private getPublicNotificacionesUrl(path: string): string {
-    const tenant = this.configService.getCurrentTenantHeader();
-    const apiBaseUrl = this.configService.getApiBaseUrl();
-
-    if (!tenant) {
-      return `${apiBaseUrl}/notificaciones/${path}`;
-    }
-
-    const url = new URL(`${apiBaseUrl}/notificaciones/${path}`);
-    const isLocalhost = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
-
-    if (isLocalhost) {
-      url.hostname = `${tenant.replace(/_/g, '-')}.localhost`;
-    }
-
-    return url.toString();
-  }
-
-  private async fetchVapidResponse(path: string, headers: Record<string, string>): Promise<Record<string, unknown>> {
-    const url = this.getPublicNotificacionesUrl(path);
+  private async fetchVapidResponse(path: string): Promise<Record<string, unknown>> {
+    const url = `${this.configService.getApiBaseUrl()}/notificaciones/${path}`;
     const response = await fetch(url, {
       method: 'GET',
-      headers,
+      headers: { Accept: 'application/json' },
     });
 
     const rawBody = await response.text();

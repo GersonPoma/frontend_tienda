@@ -4,7 +4,7 @@ import { environment } from '../../environments/environment';
 /**
  * Servicio centralizado para configuración de URLs
  * Soporta multitenant automático detectando subdominios
- * 
+ *
  * Ejemplos:
  * - tienda-amiga.localhost:8000 → http://tienda-amiga.localhost:8000/api
  * - empresa-xyz.saas.com → https://empresa-xyz.saas.com/api
@@ -70,7 +70,7 @@ export class ConfigService {
    */
   getCurrentTenant(): string | null {
     const hostname = window.location.hostname;
-    
+
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
       return null;  // No hay tenant en desarrollo local
     }
@@ -82,24 +82,6 @@ export class ConfigService {
 
     const parts = hostname.split('.');
     return parts[0];  // Devolver solo el subdominio
-  }
-
-  /**
-   * Tenant normalizado para enviar al backend por header.
-   * El subdominio local usa guiones (tienda-sol.localhost), pero el backend
-   * identifica tenants con guion bajo (tienda_sol).
-   */
-  getCurrentTenantHeader(): string | null {
-    const tenant = this.getCurrentTenant();
-    const storedTenant = localStorage.getItem('tenant_schema');
-    return tenant ? tenant.replace(/-/g, '_') : storedTenant;
-  }
-
-  /**
-   * Clave estable para separar datos locales por tenant.
-   */
-  getCurrentTenantStorageKey(): string {
-    return this.getCurrentTenantHeader() || 'localhost';
   }
 
   /**
