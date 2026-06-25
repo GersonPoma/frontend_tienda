@@ -23,6 +23,7 @@ export interface BitacoraAuditoria {
   ip?: string;
   ip_address?: string;
   fecha?: string;
+  hora?: string;
   fecha_hora?: string;
   created_at?: string;
   timestamp?: string;

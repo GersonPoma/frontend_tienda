@@ -206,8 +206,12 @@ export class BitacoraAuditoriaComponent implements OnInit, OnDestroy {
     return registro.fecha || registro.fecha_hora || registro.created_at || registro.timestamp || null;
   }
 
-  getHora(registro: BitacoraAuditoria): string {
-    return registro.hora || '-';
+  getHora(registro: BitacoraAuditoria): string | null {
+    if (registro.fecha_hora) return registro.fecha_hora;
+    if (registro.created_at) return registro.created_at;
+    if (registro.timestamp) return registro.timestamp;
+    if (registro.fecha && registro.hora) return `${registro.fecha}T${registro.hora}Z`;
+    return null;
   }
 
   getEstadoHttp(registro: BitacoraAuditoria): string {
