@@ -14,3 +14,12 @@ export interface CrearUsuario {
     grupo_id: number;
     email?: string | null;
 }
+
+export interface RegistrarCliente {
+    username: string;
+    password: string;
+    nombre: string;
+    apellido: string;
+    fecha_nacimiento: string;
+    email?: string;
+}

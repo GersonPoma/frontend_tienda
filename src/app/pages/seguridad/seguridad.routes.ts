@@ -3,6 +3,7 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { RolComponent } from './rol/rol';
 import { Autenticacion } from './autenticacion/autenticacion';
+import { RegistroComponent } from './registro/registro';
 import { UsuarioComponent } from './usuario/usuario';
 import { BitacoraAuditoriaComponent } from './bitacora-auditoria/bitacora-auditoria';
 import { DatabaseManagementComponent } from './database-management/database-management.component';
@@ -28,14 +29,21 @@ const canAccessWithPermiso = (permisos: string | string[]) => {
   };
 };
 
-// Rutas públicas (sin sidebar) - Login y Registro
+// Rutas públicas (sin sidebar) - Login
 export const SeguridadAuthRoutes: Routes = [
   {
     path: '',
     component: Autenticacion,
-    data: {
-      title: 'Autenticación'
-    }
+    data: { title: 'Iniciar Sesión' }
+  }
+];
+
+// Rutas públicas (sin sidebar) - Registro de cliente
+export const RegistroRoutes: Routes = [
+  {
+    path: '',
+    component: RegistroComponent,
+    data: { title: 'Crear Cuenta' }
   }
 ];
 

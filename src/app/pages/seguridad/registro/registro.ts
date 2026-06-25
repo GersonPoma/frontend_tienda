@@ -10,13 +10,16 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ConfigService } from '../../../services/config.service';
-import { AuthService } from '../../../services/auth.service';
+import { RegistrarCliente } from '../../../models/seguridad/Usuario.model';
 
 @Component({
-  selector: 'app-autenticacion',
+  selector: 'app-registro',
   standalone: true,
   imports: [
     CommonModule,
@@ -30,18 +33,26 @@ import { AuthService } from '../../../services/auth.service';
     MatIconModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
   ],
-  templateUrl: './autenticacion.html',
-  styleUrl: './autenticacion.scss',
+  templateUrl: './registro.html',
+  styleUrl: './registro.scss',
 })
-export class Autenticacion implements OnDestroy {
+export class RegistroComponent implements OnDestroy {
   tenantName: string = '';
   hidePassword = true;
+  hideConfirmPassword = true;
   isLoading = false;
 
   form = new FormGroup({
+    nombre: new FormControl('', [Validators.required]),
+    apellido: new FormControl('', [Validators.required]),
+    fecha_nacimiento: new FormControl<Date | null>(null, [Validators.required]),
+    email: new FormControl('', [Validators.email]),
     username: new FormControl('', [Validators.required, Validators.minLength(3)]),
     password: new FormControl('', [Validators.required, Validators.minLength(6)]),
+    confirmPassword: new FormControl('', [Validators.required, Validators.minLength(6)]),
   });
 
   private destroy$ = new Subject<void>();
@@ -49,8 +60,8 @@ export class Autenticacion implements OnDestroy {
   constructor(
     private router: Router,
     private configService: ConfigService,
-    private authService: AuthService,
     private snackBar: MatSnackBar,
+    private http: HttpClient
   ) {
     this.tenantName = this.formatTenantName();
   }
@@ -77,42 +88,48 @@ export class Autenticacion implements OnDestroy {
     this.hidePassword = !this.hidePassword;
   }
 
+  toggleConfirmPasswordVisibility(): void {
+    this.hideConfirmPassword = !this.hideConfirmPassword;
+  }
+
   submit(): void {
     if (this.form.invalid) return;
 
+    if (this.form.value.password !== this.form.value.confirmPassword) {
+      this.snackBar.open('Las contraseñas no coinciden', 'Cerrar', { duration: 5000 });
+      return;
+    }
+
     this.isLoading = true;
 
-    const credentials = {
+    const fecha = this.form.value.fecha_nacimiento;
+    const fechaStr = fecha instanceof Date
+      ? fecha.toISOString().split('T')[0]
+      : '';
+
+    const url = this.configService.getApiUrl('usuarios/registrar_cliente');
+    const body: RegistrarCliente = {
       username: this.form.value.username || '',
       password: this.form.value.password || '',
+      nombre: this.form.value.nombre || '',
+      apellido: this.form.value.apellido || '',
+      fecha_nacimiento: fechaStr,
+      ...(this.form.value.email ? { email: this.form.value.email } : {}),
     };
 
-    this.authService.login(credentials)
+    this.http.post<RegistrarCliente>(url, body)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (response) => {
+        next: () => {
           this.isLoading = false;
-          this.snackBar.open(`¡Bienvenido ${response.username}!`, 'Cerrar', { duration: 3000 });
-          setTimeout(() => {
-            const esClienteUnico = this.isClienteOnly(response.roles, response.is_superuser);
-            const destino = esClienteUnico ? '/extra/catalogo' : '/';
-            this.router.navigate([destino]);
-          }, 500);
+          this.snackBar.open('¡Cuenta creada! Ya podés iniciar sesión.', 'Cerrar', { duration: 4000 });
+          this.router.navigate(['/login']);
         },
-        error: (error) => {
+        error: (err) => {
           this.isLoading = false;
-          const errorMessage = error.error?.detail || 'Error al iniciar sesión';
-          this.snackBar.open(errorMessage, 'Cerrar', {
-            duration: 5000,
-            panelClass: ['error-snackbar'],
-          });
+          const msg = err.error?.error || err.error?.detail || 'Error al crear la cuenta';
+          this.snackBar.open(msg, 'Cerrar', { duration: 5000, panelClass: ['error-snackbar'] });
         },
       });
-  }
-
-  private isClienteOnly(roles?: string[], isSuperuser?: boolean): boolean {
-    if (isSuperuser) return false;
-    if (!roles || roles.length !== 1) return false;
-    return roles[0]?.toLowerCase() === 'cliente';
   }
 }

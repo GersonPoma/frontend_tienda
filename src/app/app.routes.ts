@@ -117,7 +117,7 @@ export const routes: Routes = [
       {
         path: 'registrar',
         loadChildren: () =>
-          import('./pages/seguridad/seguridad.routes').then((m) => m.SeguridadAuthRoutes),
+          import('./pages/seguridad/seguridad.routes').then((m) => m.RegistroRoutes),
       },
       {
         path: 'recuperar-password',
