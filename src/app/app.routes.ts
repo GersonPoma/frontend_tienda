@@ -43,7 +43,24 @@ const canMatchPublicLanding = (_route: any, segments: UrlSegment[] = []) => {
   return segments[0].path === 'empresa';
 };
 
+const canMatchSuperAdmin = (_route: any, segments: UrlSegment[] = []) => {
+  const hostname = window.location.hostname;
+  return (
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname === 'campusflow.store'
+  );
+};
+
 export const routes: Routes = [
+  // Panel superadmin del esquema público (oculto, solo en host público)
+  {
+    path: 'superadmin',
+    component: BlankComponent,
+    canMatch: [canMatchSuperAdmin],
+    loadChildren: () =>
+      import('./pages/superadmin/superadmin.routes').then((m) => m.SuperAdminRoutes),
+  },
   // Landing publica (sin sidebar) solo en host publico
   {
     path: '',
