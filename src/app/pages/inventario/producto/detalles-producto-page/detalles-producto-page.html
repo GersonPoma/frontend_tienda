@@ -297,5 +297,120 @@
         </div>
       </mat-card-content>
     </mat-card>
+
+    <!-- Sección de Reseñas -->
+    <mat-card style="margin-top: 16px;">
+      <mat-card-header>
+        <mat-card-title>
+          Reseñas
+          <span *ngIf="resenas.length > 0" style="font-size: 14px; color: #666; font-weight: 400; margin-left: 8px;">
+            ({{ resenas.length }})
+            <span *ngFor="let e of getEstrellas(calificacionPromedio || 0)" style="color: #f59e0b; font-size: 18px;">
+              <mat-icon style="font-size: 18px; width: 18px; height: 18px; vertical-align: middle;">{{ e }}</mat-icon>
+            </span>
+            {{ calificacionPromedio }}/5
+          </span>
+        </mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div *ngIf="isLoadingResenas" style="text-align: center; padding: 16px;">
+          <mat-spinner diameter="32" style="margin: 0 auto;"></mat-spinner>
+        </div>
+
+        <!-- Mi reseña (si ya existe y no está en edición) -->
+        <div *ngIf="!isLoadingResenas && miResena && !editandoResena"
+             style="margin-bottom: 16px; padding: 12px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #1976d2;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
+            <div>
+              <strong>Tu reseña</strong>
+              <div style="margin: 4px 0;">
+                <span *ngFor="let e of getEstrellas(miResena.calificacion)" style="color: #f59e0b;">
+                  <mat-icon style="font-size: 20px; width: 20px; height: 20px; vertical-align: middle;">{{ e }}</mat-icon>
+                </span>
+              </div>
+              <p style="margin: 4px 0 0 0; color: #333;">{{ miResena.comentario || 'Sin comentario' }}</p>
+            </div>
+            <div style="display: flex; gap: 4px;">
+              <button mat-icon-button matTooltip="Editar" color="primary" (click)="iniciarEdicion()" [disabled]="guardandoResena">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button matTooltip="Eliminar" color="warn" (click)="eliminarResena()" [disabled]="guardandoResena">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Editar mi reseña -->
+        <div *ngIf="!isLoadingResenas && editandoResena"
+             style="margin-bottom: 16px; padding: 12px; background: #f5f5f5; border-radius: 8px;">
+          <strong>Editar tu reseña</strong>
+          <div style="margin: 8px 0;">
+            <span *ngFor="let i of [1,2,3,4,5]"
+                  (click)="setEditCalificacion(i)"
+                  style="cursor: pointer; color: #f59e0b; font-size: 28px;">
+              <mat-icon style="font-size: 28px; width: 28px; height: 28px; vertical-align: middle;">
+                {{ i <= editCalificacion ? 'star' : 'star_border' }}
+              </mat-icon>
+            </span>
+          </div>
+          <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Comentario (opcional)</mat-label>
+            <textarea matInput [(ngModel)]="editComentario" rows="3"></textarea>
+          </mat-form-field>
+          <div style="display: flex; gap: 8px;">
+            <button mat-raised-button color="primary" (click)="guardarEdicion()" [disabled]="guardandoResena || editCalificacion < 1">
+              Guardar
+            </button>
+            <button mat-stroked-button (click)="cancelarEdicion()" [disabled]="guardandoResena">
+              Cancelar
+            </button>
+          </div>
+        </div>
+
+        <!-- Formulario nueva reseña (solo cliente sin reseña previa) -->
+        <div *ngIf="!isLoadingResenas && isCliente && !miResena && !editandoResena"
+             style="margin-bottom: 16px; padding: 12px; background: #f5f5f5; border-radius: 8px;">
+          <strong>Deja tu reseña</strong>
+          <div style="margin: 8px 0;">
+            <span *ngFor="let i of [1,2,3,4,5]"
+                  (click)="setNuevaCalificacion(i)"
+                  style="cursor: pointer; color: #f59e0b; font-size: 28px;">
+              <mat-icon style="font-size: 28px; width: 28px; height: 28px; vertical-align: middle;">
+                {{ i <= nuevaCalificacion ? 'star' : 'star_border' }}
+              </mat-icon>
+            </span>
+          </div>
+          <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Comentario (opcional)</mat-label>
+            <textarea matInput [(ngModel)]="nuevoComentario" rows="3"></textarea>
+          </mat-form-field>
+          <button mat-raised-button color="primary" (click)="enviarResena()" [disabled]="guardandoResena || nuevaCalificacion < 1">
+            Enviar reseña
+          </button>
+        </div>
+
+        <!-- Sin reseñas -->
+        <div *ngIf="!isLoadingResenas && resenas.length === 0" style="color: #999; padding: 8px 0;">
+          Aún no hay reseñas para este producto.
+        </div>
+
+        <!-- Lista de reseñas de otros usuarios -->
+        <div *ngFor="let resena of resenas"
+             [style.display]="resena.id === miResena?.id ? 'none' : 'block'"
+             style="padding: 12px 0; border-bottom: 1px solid #eee;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+            <strong>{{ resena.usuario_username }}</strong>
+            <span *ngFor="let e of getEstrellas(resena.calificacion)" style="color: #f59e0b;">
+              <mat-icon style="font-size: 16px; width: 16px; height: 16px; vertical-align: middle;">{{ e }}</mat-icon>
+            </span>
+            <span style="font-size: 12px; color: #999;">{{ resena.fecha_creacion | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <p style="margin: 0; color: #555;">{{ resena.comentario || 'Sin comentario' }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
   </div>
 </div>

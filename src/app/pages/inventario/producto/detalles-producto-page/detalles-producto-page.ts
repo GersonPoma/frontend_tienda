@@ -11,6 +11,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { Subject, takeUntil, forkJoin } from 'rxjs';
 
 import { ConfigService } from '../../../../services/config.service';
@@ -19,6 +21,8 @@ import { CartService } from '../../../../services/cart.service';
 import { FavoritosService } from '../../../../services/favoritos.service';
 import { AuthService } from '../../../../services/auth.service';
 import { PermisosService } from '../../../../services/permisos.service';
+import { ResenasService } from '../../../../services/resenas.service';
+import { Resena } from '../../../../models/inventario/resena.model';
 
 import { Producto, Multimedia } from '../../../../models/inventario/producto.model';
 import { VarianteProducto } from '../../../../models/inventario/variante.model';
@@ -42,7 +46,9 @@ import { ImagenLightboxComponent } from './imagen-lightbox/imagen-lightbox.compo
     MatProgressSpinnerModule,
     MatSnackBarModule,
     MatTableModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatInputModule,
+    MatFormFieldModule,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './detalles-producto-page.html',
@@ -57,6 +63,16 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
   isLoadingRecomendados = false;
   isSaving = false;
   esFavorito = false;
+
+  resenas: Resena[] = [];
+  miResena: Resena | null = null;
+  isLoadingResenas = false;
+  nuevaCalificacion = 0;
+  nuevoComentario = '';
+  editandoResena = false;
+  editCalificacion = 0;
+  editComentario = '';
+  guardandoResena = false;
 
   archivoSeleccionado: File | null = null;
   previewUrl: string | null = null;
@@ -86,8 +102,8 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
     private favoritosService: FavoritosService,
     private dialog: MatDialog,
     private authService: AuthService,
-    public permisosService: PermisosService
-
+    public permisosService: PermisosService,
+    private resenasService: ResenasService,
   ) {
     this.multimediaUrl = this.configService.getApiUrl('multimedios');
     this.variantesUrl = this.configService.getApiUrl('variantes');
@@ -102,9 +118,12 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
         this.producto = null;
         this.variantes = [];
         this.productosRecomendados = [];
+        this.resenas = [];
+        this.miResena = null;
         this.imagenSeleccionadaIndex = -1;
         this.cargarProducto();
         this.cargarVariantes();
+        this.cargarResenas();
       });
 
     this.favoritosService.favoritos$.subscribe(favoritos => {
@@ -471,7 +490,7 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
   agregarAlCarrito(variante: VarianteProducto): void {
     this.cartService.agregarProducto(variante.id, 1).subscribe({
       next: () => {
-        this.snackBar.open('¡Producto añadido al carrito!', 'Ver Carrito', { 
+        this.snackBar.open('¡Producto añadido al carrito!', 'Ver Carrito', {
           duration: 3000,
           horizontalPosition: 'right',
           verticalPosition: 'top'
@@ -484,6 +503,122 @@ export class DetallesProductoPageComponent implements OnInit, OnDestroy {
         this.snackBar.open(msg, 'Cerrar', { duration: 3000 });
       }
     });
+  }
+
+  private cargarResenas(): void {
+    this.isLoadingResenas = true;
+    this.resenasService.listarPorProducto(this.productoId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.resenas = data.results;
+          const username = this.authService.getCurrentAuthState().username;
+          this.miResena = this.resenas.find(r => r.usuario_username === username) || null;
+          this.isLoadingResenas = false;
+        },
+        error: () => { this.isLoadingResenas = false; }
+      });
+  }
+
+  setNuevaCalificacion(valor: number): void {
+    this.nuevaCalificacion = valor;
+  }
+
+  setEditCalificacion(valor: number): void {
+    this.editCalificacion = valor;
+  }
+
+  enviarResena(): void {
+    if (this.nuevaCalificacion < 1) {
+      this.snackBar.open('Selecciona una calificación', 'Cerrar', { duration: 3000 });
+      return;
+    }
+    this.guardandoResena = true;
+    this.resenasService.crear({
+      producto_id: this.productoId,
+      calificacion: this.nuevaCalificacion,
+      comentario: this.nuevoComentario,
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.guardandoResena = false;
+        this.nuevaCalificacion = 0;
+        this.nuevoComentario = '';
+        this.snackBar.open('Reseña enviada', 'OK', { duration: 3000 });
+        this.cargarResenas();
+      },
+      error: (err) => {
+        this.guardandoResena = false;
+        this.snackBar.open(err.error?.detail || 'Error al enviar reseña', 'Cerrar', { duration: 4000 });
+      }
+    });
+  }
+
+  iniciarEdicion(): void {
+    if (!this.miResena) return;
+    this.editCalificacion = this.miResena.calificacion;
+    this.editComentario = this.miResena.comentario;
+    this.editandoResena = true;
+  }
+
+  cancelarEdicion(): void {
+    this.editandoResena = false;
+  }
+
+  guardarEdicion(): void {
+    if (!this.miResena || this.editCalificacion < 1) return;
+    this.guardandoResena = true;
+    this.resenasService.actualizar(this.miResena.id, {
+      calificacion: this.editCalificacion,
+      comentario: this.editComentario,
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.guardandoResena = false;
+        this.editandoResena = false;
+        this.snackBar.open('Reseña actualizada', 'OK', { duration: 3000 });
+        this.cargarResenas();
+      },
+      error: (err) => {
+        this.guardandoResena = false;
+        this.snackBar.open(err.error?.detail || 'Error al actualizar reseña', 'Cerrar', { duration: 4000 });
+      }
+    });
+  }
+
+  eliminarResena(): void {
+    if (!this.miResena) return;
+    this.guardandoResena = true;
+    this.resenasService.eliminar(this.miResena.id)
+      .pipe(takeUntil(this.destroy$)).subscribe({
+        next: () => {
+          this.guardandoResena = false;
+          this.snackBar.open('Reseña eliminada', 'OK', { duration: 3000 });
+          this.cargarResenas();
+        },
+        error: () => {
+          this.guardandoResena = false;
+          this.snackBar.open('Error al eliminar reseña', 'Cerrar', { duration: 3000 });
+        }
+      });
+  }
+
+  getEstrellas(calificacion: number): string[] {
+    const estrellas: string[] = [];
+    for (let i = 1; i <= 5; i++) {
+      if (i <= Math.floor(calificacion)) {
+        estrellas.push('star');
+      } else if (i - calificacion < 1 && i - calificacion > 0) {
+        estrellas.push('star_half');
+      } else {
+        estrellas.push('star_border');
+      }
+    }
+    return estrellas;
+  }
+
+  get calificacionPromedio(): number | null {
+    if (this.resenas.length === 0) return null;
+    const sum = this.resenas.reduce((acc, r) => acc + r.calificacion, 0);
+    return Math.round((sum / this.resenas.length) * 10) / 10;
   }
 }
 

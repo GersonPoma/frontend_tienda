@@ -27,6 +27,8 @@ interface Producto {
   categoria: number;
   imagen_principal: string;
   precio_minimo: number;
+  calificacion_promedio: number | null;
+  total_resenas: number;
 }
 
 interface Categoria {
@@ -160,5 +162,19 @@ export class CatalogoComponent implements OnInit {
         }
       });
     }
+  }
+
+  getEstrellas(calificacion: number): string[] {
+    const estrellas: string[] = [];
+    for (let i = 1; i <= 5; i++) {
+      if (i <= Math.floor(calificacion)) {
+        estrellas.push('star');
+      } else if (i - calificacion < 1 && i - calificacion > 0) {
+        estrellas.push('star_half');
+      } else {
+        estrellas.push('star_border');
+      }
+    }
+    return estrellas;
   }
 }
