@@ -91,7 +91,6 @@ export class MarcaComponent implements OnInit, OnDestroy {
         next: (data: Pagination<Marca>) => {
           this.dataSource = data.results;
           this.totalItems = data.count;
-          this.pageSize = data.results.length;
           this.isLoading = false;
         },
         error: (error) => {

@@ -93,7 +93,6 @@ export class CategoriaComponent implements OnInit, OnDestroy {
         next: (data: Pagination<Categoria>) => {
           this.dataSource = data.results;
           this.totalItems = data.count;
-          this.pageSize = data.results.length;
           this.isLoading = false;
         },
         error: (error) => {

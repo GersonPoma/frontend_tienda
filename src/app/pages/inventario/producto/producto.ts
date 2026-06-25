@@ -94,7 +94,6 @@ export class ProductoComponent implements OnInit, OnDestroy {
         next: (data: Pagination<Producto>) => {
           this.dataSource = data.results;
           this.totalItems = data.count;
-          this.pageSize = data.results.length;
           this.isLoading = false;
         },
         error: (error) => {

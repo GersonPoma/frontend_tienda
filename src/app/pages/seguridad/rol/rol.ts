@@ -97,8 +97,6 @@ export class RolComponent implements OnInit, OnDestroy {
         next: (data: Pagination<Rol>) => {
           this.dataSource = data.results;
           this.totalItems = data.count;
-          // Actualizar pageSize dinámicamente basado en lo que retorna el backend
-          this.pageSize = data.results.length;
           this.isLoading = false;
         },
         error: (error) => {

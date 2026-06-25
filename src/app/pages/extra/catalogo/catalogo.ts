@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -10,7 +10,6 @@ import { MatChipsModule } from '@angular/material/chips';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from 'src/app/services/api.service';
 import { ConfigService } from 'src/app/services/config.service';
-import { CartService } from 'src/app/services/cart.service';
 import { FavoritosService } from 'src/app/services/favoritos.service';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -57,25 +56,28 @@ interface Categoria {
   templateUrl: './catalogo.html',
   styleUrls: ['./catalogo.scss']
 })
-export class CatalogoComponent implements OnInit {
+export class CatalogoComponent implements OnInit, AfterViewInit, OnDestroy {
   productos: Producto[] = [];
   categorias: Categoria[] = [];
   categoriaSeleccionada: number | null = null;
   terminoBusqueda: string = '';
   cargando: boolean = true;
+  cargandoMas: boolean = false;
+  hayMas: boolean = false;
+  paginaActual: number = 1;
   favoritosIds: Set<number> = new Set();
-  
+
+  @ViewChild('sentinel') sentinelRef!: ElementRef;
+  private observer!: IntersectionObserver;
   private searchSubject = new Subject<string>();
 
   constructor(
     private apiService: ApiService,
     private configService: ConfigService,
-    private cartService: CartService,
     private favoritosService: FavoritosService,
     private snackBar: MatSnackBar,
     private router: Router
   ) {
-    // Configurar búsqueda con debounce (300ms)
     this.searchSubject.pipe(
       debounceTime(300),
       distinctUntilChanged()
@@ -93,6 +95,24 @@ export class CatalogoComponent implements OnInit {
     });
   }
 
+  ngAfterViewInit(): void {
+    this.observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        this.cargarMasProductos();
+      }
+    }, { threshold: 0.1 });
+
+    if (this.sentinelRef) {
+      this.observer.observe(this.sentinelRef.nativeElement);
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.observer) {
+      this.observer.disconnect();
+    }
+  }
+
   cargarCategorias(): void {
     const url = this.configService.getApiUrl('categorias');
     this.apiService.getWithPagination<Categoria>(url, 1, 100).subscribe(res => {
@@ -102,25 +122,47 @@ export class CatalogoComponent implements OnInit {
 
   cargarProductos(): void {
     this.cargando = true;
-    const url = this.configService.getApiUrl('catalogo');
-    const params: any = { page_size: 20 };
-    
-    if (this.categoriaSeleccionada) {
-      params.categoria = this.categoriaSeleccionada;
-    }
-    
-    if (this.terminoBusqueda) {
-      params.search = this.terminoBusqueda;
-    }
+    this.paginaActual = 1;
+    this.productos = [];
+    this.hayMas = false;
 
-    this.apiService.getWithPagination<Producto>(url, 1, 20, params).subscribe({
+    const url = this.configService.getApiUrl('catalogo');
+    const filtros: Record<string, any> = {};
+    if (this.categoriaSeleccionada) filtros['categoria'] = this.categoriaSeleccionada;
+    if (this.terminoBusqueda) filtros['search'] = this.terminoBusqueda;
+
+    this.apiService.getWithPagination<Producto>(url, 1, 10, filtros).subscribe({
       next: (res) => {
         this.productos = res.results;
+        this.hayMas = !!res.next;
         this.cargando = false;
       },
       error: () => {
         this.cargando = false;
         this.snackBar.open('Error al cargar productos', 'Cerrar', { duration: 3000 });
+      }
+    });
+  }
+
+  cargarMasProductos(): void {
+    if (this.cargandoMas || !this.hayMas) return;
+    this.cargandoMas = true;
+    this.paginaActual++;
+
+    const url = this.configService.getApiUrl('catalogo');
+    const filtros: Record<string, any> = {};
+    if (this.categoriaSeleccionada) filtros['categoria'] = this.categoriaSeleccionada;
+    if (this.terminoBusqueda) filtros['search'] = this.terminoBusqueda;
+
+    this.apiService.getWithPagination<Producto>(url, this.paginaActual, 10, filtros).subscribe({
+      next: (res) => {
+        this.productos = [...this.productos, ...res.results];
+        this.hayMas = !!res.next;
+        this.cargandoMas = false;
+      },
+      error: () => {
+        this.paginaActual--;
+        this.cargandoMas = false;
       }
     });
   }

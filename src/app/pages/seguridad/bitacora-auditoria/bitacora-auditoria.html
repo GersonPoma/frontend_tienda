@@ -127,7 +127,7 @@
       *ngIf="dataSource.length > 0"
       [length]="totalItems"
       [pageSize]="pageSize"
-      [pageSizeOptions]="[10, 25, 50]"
+      hidePageSize="true"
       (page)="onPageChange($event)">
     </mat-paginator>
   </mat-card-content>
