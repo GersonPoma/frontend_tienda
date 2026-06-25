@@ -10,8 +10,8 @@ export interface SuscripcionResumen {
 export interface EmpresaPanel {
   id: number;
   nombre: string;
-  correo: string;
-  subdominio: string;
+  correo: string | null;
+  subdominio: string | null;
   is_active: boolean;
   fecha_creacion: string;
   suscripcion_actual: SuscripcionResumen | null;
