@@ -48,6 +48,7 @@ const canMatchSuperAdmin = (_route: any, segments: UrlSegment[] = []) => {
   return (
     hostname === 'localhost' ||
     hostname === '127.0.0.1' ||
+    hostname === 'admin.localhost' ||
     hostname === 'campusflow.store'
   );
 };

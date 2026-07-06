@@ -10,6 +10,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from 'src/app/services/api.service';
 import { ConfigService } from 'src/app/services/config.service';
+import { ComparadorService } from 'src/app/services/comparador.service';
 import { FavoritosService } from 'src/app/services/favoritos.service';
 import { PermisosService } from 'src/app/services/permisos.service';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -67,6 +68,8 @@ export class CatalogoComponent implements OnInit, AfterViewInit, OnDestroy {
   hayMas: boolean = false;
   paginaActual: number = 1;
   favoritosIds: Set<number> = new Set();
+  comparadorIds: Set<number> = new Set();
+  cantidadComparador = 0;
 
   @ViewChild('sentinel') sentinelRef!: ElementRef;
   private observer!: IntersectionObserver;
@@ -77,6 +80,7 @@ export class CatalogoComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private apiService: ApiService,
     private configService: ConfigService,
+    private comparadorService: ComparadorService,
     private favoritosService: FavoritosService,
     private snackBar: MatSnackBar,
     private router: Router,
@@ -97,6 +101,10 @@ export class CatalogoComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cargarProductos();
     this.favoritosService.favoritos$.subscribe(favoritos => {
       this.favoritosIds = new Set(favoritos.map(f => f.producto_id));
+    });
+    this.comparadorService.ids$.subscribe(ids => {
+      this.comparadorIds = new Set(ids);
+      this.cantidadComparador = ids.length;
     });
   }
 
@@ -188,6 +196,25 @@ export class CatalogoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   esFavorito(productoId: number): boolean {
     return this.favoritosIds.has(productoId);
+  }
+
+  esComparado(productoId: number): boolean {
+    return this.comparadorIds.has(productoId);
+  }
+
+  toggleComparador(prod: Producto): void {
+    if (this.esComparado(prod.id)) {
+      this.comparadorService.quitar(prod.id);
+      this.snackBar.open(`${prod.nombre} quitado del comparador`, 'Cerrar', { duration: 2000 });
+      return;
+    }
+
+    const resultado = this.comparadorService.agregar(prod.id, prod.nombre);
+    this.snackBar.open(resultado.mensaje, 'Cerrar', { duration: 2500 });
+  }
+
+  irComparador(): void {
+    this.router.navigate(['/extra/comparador']);
   }
 
   toggleFavorito(prod: Producto): void {

@@ -11,6 +11,13 @@
         <input matInput (input)="onSearch($event)" placeholder="Ej: Mesa de madera, Silla ergonómica...">
       </mat-form-field>
     </div>
+
+    <div class="catalog-actions m-t-16">
+      <button mat-stroked-button color="primary" [disabled]="cantidadComparador === 0" (click)="irComparador()">
+        <mat-icon>compare_arrows</mat-icon>
+        Comparador ({{ cantidadComparador }})
+      </button>
+    </div>
   </div>
 
   <!-- Filtros de Categoría -->
@@ -62,6 +69,16 @@
             <mat-icon>visibility</mat-icon>
           </button>
         </div>
+
+        <button
+          mat-stroked-button
+          color="primary"
+          class="compare-btn w-100 m-t-16"
+          [class.compare-active]="esComparado(prod.id)"
+          (click)="$event.stopPropagation(); toggleComparador(prod)">
+          <mat-icon>{{ esComparado(prod.id) ? 'done' : 'compare_arrows' }}</mat-icon>
+          {{ esComparado(prod.id) ? 'En comparador' : 'Comparar' }}
+        </button>
       </mat-card-content>
     </mat-card>
   </div>

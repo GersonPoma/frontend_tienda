@@ -15,6 +15,11 @@
     margin: 0 auto;
   }
 
+  .catalog-actions {
+    display: flex;
+    justify-content: center;
+  }
+
   .filters-section {
     display: flex;
     justify-content: center;
@@ -104,6 +109,14 @@
       .f-w-700 {
         color: #1976d2;
       }
+    }
+
+    .compare-btn {
+      justify-content: center;
+    }
+
+    .compare-active {
+      background: rgba(25, 118, 210, 0.08);
     }
   }
 
