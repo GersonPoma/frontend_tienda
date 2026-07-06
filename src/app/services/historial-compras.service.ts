@@ -23,6 +23,7 @@ export interface CompraHistorial {
   tipo: string;
   cantidad_productos: number;
   productos: ProductoCompraHistorial[];
+  descuento_fidelizacion: string | number;
 }
 
 export interface FiltrosHistorialCompras {

@@ -70,6 +70,12 @@ export const navItems: NavItem[] = [
     permiso: PermisosService.INVENTARIO_VIEW_CATALOGO,
   },
   {
+    displayName: 'Mis Beneficios',
+    iconName: 'solar:gift-line-duotone',
+    route: '/mis-beneficios',
+    permiso: PermisosService.INVENTARIO_VIEW_CATALOGO,
+  },
+  {
     displayName: 'Categorías',
     iconName: 'solar:tag-line-duotone',
     route: '/inventario/categorias',
@@ -159,6 +165,7 @@ export const navItems: NavItem[] = [
     permiso: [
       PermisosService.SEGURIDAD_CHANGE_EMPRESA,
       PermisosService.SEGURIDAD_VIEW_MI_SUSCRIPCION,
+      PermisosService.VENTA_CHANGE_CONFIGURACIONFIDELIZACION,
     ],
   },
   {
@@ -172,6 +179,12 @@ export const navItems: NavItem[] = [
     iconName: 'solar:card-recive-line-duotone',
     route: '/suscripcion',
     permiso: PermisosService.SEGURIDAD_VIEW_MI_SUSCRIPCION,
+  },
+  {
+    displayName: 'Fidelización',
+    iconName: 'solar:medal-ribbons-star-line-duotone',
+    route: '/empresa/fidelizacion',
+    permiso: PermisosService.VENTA_CHANGE_CONFIGURACIONFIDELIZACION,
   },
   // {
   //   navCap: 'Home',

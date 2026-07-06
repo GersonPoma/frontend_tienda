@@ -149,6 +149,13 @@ export class CarritoComponent implements OnInit {
     });
   }
 
+  totalConDescuento(): number {
+    if (!this.carrito) return 0;
+    const beneficio = this.carrito.beneficio_fidelizacion;
+    if (!beneficio?.elegible) return this.carrito.total;
+    return Math.max(0, this.carrito.total - beneficio.monto_descuento);
+  }
+
   irACatalogo(): void {
     this.router.navigate(['/extra/catalogo']);
   }

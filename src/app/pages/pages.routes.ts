@@ -1,5 +1,22 @@
 import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { PermisosService } from '../services/permisos.service';
+
+const canAccessWithPermiso = (permiso: string) => {
+  return () => {
+    const permisosService = inject(PermisosService);
+    const router = inject(Router);
+
+    if (permisosService.tiene(permiso)) {
+      return true;
+    }
+
+    router.navigate(['/dashboard']);
+    return false;
+  };
+};
 
 export const PagesRoutes: Routes = [
   {
@@ -73,6 +90,31 @@ export const PagesRoutes: Routes = [
       urls: [
         { title: 'Dashboard', url: '/' },
         { title: 'Configuración' }
+      ]
+    }
+  },
+  {
+    path: 'mis-beneficios',
+    loadComponent: () =>
+      import('./mis-beneficios/mis-beneficios.component').then((m) => m.MisBeneficiosComponent),
+    data: {
+      title: 'Mis Beneficios',
+      urls: [
+        { title: 'Dashboard', url: '/' },
+        { title: 'Mis Beneficios' }
+      ]
+    }
+  },
+  {
+    path: 'empresa/fidelizacion',
+    loadComponent: () =>
+      import('./empresa/fidelizacion/fidelizacion.component').then((m) => m.FidelizacionConfigComponent),
+    canActivate: [canAccessWithPermiso(PermisosService.VENTA_CHANGE_CONFIGURACIONFIDELIZACION)],
+    data: {
+      title: 'Fidelización de Clientes',
+      urls: [
+        { title: 'Dashboard', url: '/' },
+        { title: 'Fidelización de Clientes' }
       ]
     }
   },

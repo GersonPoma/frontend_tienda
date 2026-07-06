@@ -107,6 +107,10 @@ export class PermisosService {
   static readonly VENTA_CHANGE_VENTA = 'venta.change_venta';
   static readonly VENTA_DELETE_VENTA = 'venta.delete_venta';
 
+  // VENTA - CONFIGURACIÓN DE FIDELIZACIÓN
+  static readonly VENTA_VIEW_CONFIGURACIONFIDELIZACION = 'venta.view_configuracionfidelizacion';
+  static readonly VENTA_CHANGE_CONFIGURACIONFIDELIZACION = 'venta.change_configuracionfidelizacion';
+
   // AUTH - PERMISO
   static readonly AUTH_VIEW_PERMISSION = 'auth.view_permission';
   static readonly AUTH_CHANGE_PERMISSION = 'auth.change_permission';

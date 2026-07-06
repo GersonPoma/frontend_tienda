@@ -12,6 +12,15 @@ export interface DetalleCarrito {
   subtotal: number;
 }
 
+export interface BeneficioFidelizacion {
+  acumulado: number;
+  monto_minimo: number;
+  monto_descuento: number;
+  activo: boolean;
+  usado: boolean;
+  elegible: boolean;
+}
+
 export interface Carrito {
   id: number;
   usuario: number;
@@ -19,6 +28,7 @@ export interface Carrito {
   detalles: DetalleCarrito[];
   total: number;
   fecha_actualizacion: string;
+  beneficio_fidelizacion: BeneficioFidelizacion;
 }
 
 @Injectable({
