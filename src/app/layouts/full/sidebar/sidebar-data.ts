@@ -58,6 +58,18 @@ export const navItems: NavItem[] = [
     permiso: PermisosService.INVENTARIO_VIEW_CATALOGO,
   },
   {
+    displayName: 'Comparador',
+    iconName: 'solar:slider-horizontal-line-duotone',
+    route: '/extra/comparador',
+    permiso: PermisosService.INVENTARIO_VIEW_CATALOGO,
+  },
+  {
+    displayName: 'Mis Compras',
+    iconName: 'solar:receipt-list-line-duotone',
+    route: '/mis-compras',
+    permiso: PermisosService.INVENTARIO_VIEW_CATALOGO,
+  },
+  {
     displayName: 'Categorías',
     iconName: 'solar:tag-line-duotone',
     route: '/inventario/categorias',

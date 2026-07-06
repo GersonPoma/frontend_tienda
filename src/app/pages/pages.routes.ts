@@ -53,6 +53,18 @@ export const PagesRoutes: Routes = [
     }
   },
   {
+    path: 'mis-compras',
+    loadComponent: () =>
+      import('./historial-compras/historial-compras.component').then((m) => m.HistorialComprasComponent),
+    data: {
+      title: 'Historial de compras',
+      urls: [
+        { title: 'Dashboard', url: '/' },
+        { title: 'Historial de compras' }
+      ]
+    }
+  },
+  {
     path: 'configuracion',
     loadComponent: () =>
       import('./empresa/configuracion/configuracion.component').then((m) => m.ConfiguracionComponent),
