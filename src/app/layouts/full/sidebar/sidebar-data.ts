@@ -146,6 +146,7 @@ export const navItems: NavItem[] = [
     permiso: [
       PermisosService.SEGURIDAD_ADD_PREDICCION,
       PermisosService.IA_VIEW_ALERTA,
+      PermisosService.IA_VIEW_SUGERENCIACOMPRA,
     ],
   },
   {
@@ -159,6 +160,12 @@ export const navItems: NavItem[] = [
     iconName: 'solar:bell-bing-line-duotone',
     route: '/ia/alertas',
     permiso: PermisosService.IA_VIEW_ALERTA,
+  },
+  {
+    displayName: 'Sugerencias de Compra',
+    iconName: 'solar:cart-plus-line-duotone',
+    route: '/ia/sugerencias-compra',
+    permiso: PermisosService.IA_VIEW_SUGERENCIACOMPRA,
   },
   {
     navCap: 'Configuración',

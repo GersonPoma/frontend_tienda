@@ -95,6 +95,10 @@ export class PermisosService {
   static readonly IA_CHANGE_ALERTA = 'ia.change_alerta';
   static readonly IA_DELETE_ALERTA = 'ia.delete_alerta';
 
+  // IA - SUGERENCIA DE COMPRA
+  static readonly IA_VIEW_SUGERENCIACOMPRA = 'ia.view_sugerenciacompra';
+  static readonly IA_CHANGE_SUGERENCIACOMPRA = 'ia.change_sugerenciacompra';
+
   // AUTH - GRUPO (ROL)
   static readonly AUTH_VIEW_GROUP = 'auth.view_group';
   static readonly AUTH_ADD_GROUP = 'auth.add_group';

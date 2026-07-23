@@ -18,5 +18,14 @@ export const IaRoutes: Routes = [
       title: 'Predicción de Demanda',
       urls: [{ title: 'Dashboard', url: '/' }, { title: 'Predicción IA' }]
     }
+  },
+  {
+    path: 'sugerencias-compra',
+    loadComponent: () =>
+      import('./sugerencias-compra/sugerencias-compra.component').then(m => m.SugerenciasCompraComponent),
+    data: {
+      title: 'Sugerencias de Compra',
+      urls: [{ title: 'Dashboard', url: '/' }, { title: 'Sugerencias de Compra' }]
+    }
   }
 ];
